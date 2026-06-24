@@ -1,0 +1,109 @@
+<div class="expense-container">
+  <div class="header">
+    <h1>Expense Tracking</h1>
+    <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
+      {{ showAddForm ? 'Cancel' : 'Log Expense' }}
+    </button>
+  </div>
+
+  <div *ngIf="showAddForm" class="card add-form">
+    <h3>Log New Expense</h3>
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+    
+    <form (ngSubmit)="onAddExpense()">
+      <div class="form-group">
+        <label for="description">Description</label>
+        <input 
+          type="text" 
+          id="description" 
+          class="form-control" 
+          [(ngModel)]="newExpense.description" 
+          name="description" 
+          required
+          placeholder="e.g., Grocery shopping, Gas, Movie tickets"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="amount">Amount ($)</label>
+        <input 
+          type="number" 
+          id="amount" 
+          class="form-control" 
+          [(ngModel)]="newExpense.amount" 
+          name="amount" 
+          required
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input 
+          type="date" 
+          id="date" 
+          class="form-control" 
+          [(ngModel)]="newExpense.date" 
+          name="date" 
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select 
+          id="category" 
+          class="form-control" 
+          [(ngModel)]="newExpense.category" 
+          name="category" 
+          required
+        >
+          <option value="">Select Category</option>
+          <option value="food">Food & Dining</option>
+          <option value="transportation">Transportation</option>
+          <option value="utilities">Utilities</option>
+          <option value="entertainment">Entertainment</option>
+          <option value="shopping">Shopping</option>
+          <option value="healthcare">Healthcare</option>
+          <option value="education">Education</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-success">Log Expense</button>
+    </form>
+  </div>
+
+  <div class="card summary-card">
+    <h3>Monthly Expense Summary</h3>
+    <div class="summary-amount expense-amount">
+      ${{ totalMonthlyExpenses.toFixed(2) }}
+    </div>
+    <p class="summary-label">Total for {{ currentMonth }}</p>
+  </div>
+
+  <div class="card expense-list">
+    <h3>Expense Records</h3>
+    <div *ngIf="expenseList.length === 0" class="no-data">
+      No expense records found. Log your first expense!
+    </div>
+    
+    <div *ngFor="let expense of expenseList" class="expense-item">
+      <div class="expense-details">
+        <h4>{{ expense.description }}</h4>
+        <p class="expense-category">{{ formatCategory(expense.category) }}</p>
+        <p class="expense-date">{{ formatDate(expense.date) }}</p>
+      </div>
+      <div class="expense-amount">
+        ${{ expense.amount.toFixed(2) }}
+      </div>
+      <button class="btn btn-danger btn-sm" (click)="deleteExpense(expense.id)">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+<div class="dashboard-container">
+  <div class="header">
+    <h1>Financial Overview</h1>
+    <div class="user-info">
+      <span>Welcome, {{ currentUser }}</span>
+      <button class="btn btn-danger btn-sm" (click)="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="navigation">
+    <button class="nav-btn" routerLink="/income">Income</button>
+    <button class="nav-btn" routerLink="/expense">Expenses</button>
+    <button class="nav-btn" routerLink="/budget">Budgets</button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card summary-card income-card">
+      <h3>Total Income</h3>
+      <div class="summary-amount">${{ totalIncome.toFixed(2) }}</div>
+      <p class="summary-label">{{ currentMonth }}</p>
+    </div>
+    
+    <div class="card summary-card expense-card">
+      <h3>Total Expenses</h3>
+      <div class="summary-amount">${{ totalExpenses.toFixed(2) }}</div>
+      <p class="summary-label">{{ currentMonth }}</p>
+    </div>
+    
+    <div class="card summary-card balance-card">
+      <h3>Net Balance</h3>
+      <div class="summary-amount" [ngClass]="balanceClass">${{ netBalance.toFixed(2) }}</div>
+      <p class="summary-label">{{ currentMonth }}</p>
+    </div>
+    
+    <div class="card summary-card savings-card">
+      <h3>Savings Rate</h3>
+      <div class="summary-amount">{{ savingsRate.toFixed(1) }}%</div>
+      <p class="summary-label">of income saved</p>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section">
+    <div class="card chart-card">
+      <h3>Expense Distribution</h3>
+      <div class="chart-container">
+        <canvas id="expensePieChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="card chart-card">
+      <h3>Income vs Expenses Trend</h3>
+      <div class="chart-container">
+        <canvas id="trendLineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget Progress Section -->
+  <div class="card budget-progress-section">
+    <h3>Budget Progress</h3>
+    <div *ngIf="budgetList.length === 0" class="no-data">
+      No budgets set. Go to Budgets page to create one!
+    </div>
+    
+    <div *ngFor="let budget of budgetList" class="budget-progress-item">
+      <div class="budget-header">
+        <span class="budget-name">{{ formatCategory(budget.category) }}</span>
+        <span class="budget-status" [ngClass]="getProgressClass(budget.spent, budget.limit)">
+          {{ getProgressPercentage(budget.spent, budget.limit).toFixed(1) }}%
+        </span>
+      </div>
+      
+      <div class="progress-bar">
+        <div 
+          class="progress-fill" 
+          [ngClass]="getProgressClass(budget.spent, budget.limit)"
+          [style.width]="getProgressPercentage(budget.spent, budget.limit) + '%'"
+        ></div>
+      </div>
+      
+      <div class="budget-details">
+        <span class="spent">Spent: ${{ budget.spent.toFixed(2) }}</span>
+        <span class="limit">Limit: ${{ budget.limit.toFixed(2) }}</span>
+      </div>
+      
+      <div *ngIf="budget.spent > budget.limit" class="alert alert-danger">
+        ⚠️ Over budget by ${{ (budget.spent - budget.limit).toFixed(2) }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="card recent-transactions">
+    <h3>Recent Transactions</h3>
+    <div *ngIf="recentTransactions.length === 0" class="no-data">
+      No recent transactions found.
+    </div>
+    
+    <div *ngFor="let transaction of recentTransactions" class="transaction-item">
+      <div class="transaction-icon" [ngClass]="transaction.type">
+        {{ transaction.type === 'income' ? '↑' : '↓' }}
+      </div>
+      <div class="transaction-details">
+        <h4>{{ transaction.description }}</h4>
+        <p class="transaction-date">{{ formatDate(transaction.date) }}</p>
+      </div>
+      <div class="transaction-amount" [ngClass]="transaction.type">
+        {{ transaction.type === 'income' ? '+' : '-' }}${{ transaction.amount.toFixed(2) }}
+      </div>
+    </div>
+  </div>
+</div>

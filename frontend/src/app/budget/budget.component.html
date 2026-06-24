@@ -1,0 +1,91 @@
+<div class="budget-container">
+  <div class="header">
+    <h1>Budget Management</h1>
+    <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
+      {{ showAddForm ? 'Cancel' : 'Set Budget' }}
+    </button>
+  </div>
+
+  <div *ngIf="showAddForm" class="card add-form">
+    <h3>Set Category Budget</h3>
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+    
+    <form (ngSubmit)="onAddBudget()">
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select 
+          id="category" 
+          class="form-control" 
+          [(ngModel)]="newBudget.category" 
+          name="category" 
+          required
+        >
+          <option value="">Select Category</option>
+          <option value="food">Food & Dining</option>
+          <option value="transportation">Transportation</option>
+          <option value="utilities">Utilities</option>
+          <option value="entertainment">Entertainment</option>
+          <option value="shopping">Shopping</option>
+          <option value="healthcare">Healthcare</option>
+          <option value="education">Education</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="limit">Monthly Limit ($)</label>
+        <input 
+          type="number" 
+          id="limit" 
+          class="form-control" 
+          [(ngModel)]="newBudget.limit" 
+          name="limit" 
+          required
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+        >
+      </div>
+      
+      <button type="submit" class="btn btn-success">Set Budget</button>
+    </form>
+  </div>
+
+  <div class="budget-list">
+    <div *ngIf="budgetList.length === 0" class="no-data">
+      No budgets set. Create your first budget!
+    </div>
+    
+    <div *ngFor="let budget of budgetList" class="card budget-item">
+      <div class="budget-header">
+        <h3>{{ formatCategory(budget.category) }}</h3>
+        <button class="btn btn-danger btn-sm" (click)="deleteBudget(budget.id)">
+          Delete
+        </button>
+      </div>
+      
+      <div class="budget-progress">
+        <div class="progress-info">
+          <span class="spent">Spent: ${{ budget.spent.toFixed(2) }}</span>
+          <span class="limit">Limit: ${{ budget.limit.toFixed(2) }}</span>
+        </div>
+        <div class="progress-bar">
+          <div 
+            class="progress-fill" 
+            [ngClass]="getProgressClass(budget.spent, budget.limit)"
+            [style.width]="getProgressPercentage(budget.spent, budget.limit) + '%'"
+          ></div>
+        </div>
+        <div class="progress-percentage">
+          {{ getProgressPercentage(budget.spent, budget.limit).toFixed(1) }}% used
+        </div>
+      </div>
+      
+      <div *ngIf="budget.spent > budget.limit" class="alert alert-danger">
+        ⚠️ Budget exceeded by ${{ (budget.spent - budget.limit).toFixed(2) }}
+      </div>
+    </div>
+  </div>
+</div>
