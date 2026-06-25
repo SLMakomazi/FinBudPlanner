@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
+import { SignupComponent } from './signup/signup.component';
 import { IncomeComponent } from './income/income.component';
 import { BudgetComponent } from './budget/budget.component';
 import { ExpenseComponent } from './expense/expense.component';
@@ -15,6 +16,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 const routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' as any },
   { path: 'login', component: LoginComponent },
+  { path: 'signup', component: SignupComponent },
   { path: 'income', component: IncomeComponent },
   { path: 'budget', component: BudgetComponent },
   { path: 'expense', component: ExpenseComponent },
@@ -25,6 +27,7 @@ const routes = [
   declarations: [
     AppComponent,
     LoginComponent,
+    SignupComponent,
     IncomeComponent,
     BudgetComponent,
     ExpenseComponent,

@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Chart } from 'chart.js/auto';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent {
+export class DashboardComponent implements AfterViewInit {
   currentUser = '';
   incomeList = [];
   expenseList = [];
@@ -16,34 +17,57 @@ export class DashboardComponent {
   router;
   pieChart;
   lineChart;
+  selectedTab = 'week'; // 'week', 'month', 'year'
 
   constructor(router: Router) {
+    console.log('[DashboardComponent] Constructor called');
     this.router = router;
     this.loadUserData();
+  }
+
+  ngOnInit() {
+    console.log('[DashboardComponent] ngOnInit called');
+  }
+
+  ngAfterViewInit() {
+    console.log('[DashboardComponent] ngAfterViewInit called - initializing charts');
     this.initCharts();
   }
 
+  selectTab(tab: string) {
+    console.log('[DashboardComponent] selectTab called:', tab);
+    this.selectedTab = tab;
+    this.initLineChart(); // Reinitialize chart with new data
+  }
+
   loadUserData() {
+    console.log('[DashboardComponent] loadUserData called');
     const user = localStorage.getItem('currentUser');
+    console.log('[DashboardComponent] User from localStorage:', user);
     if (user) {
       this.currentUser = JSON.parse(user).username;
+      console.log('[DashboardComponent] Current user:', this.currentUser);
     } else {
+      console.log('[DashboardComponent] No user found, navigating to login');
       this.router.navigate(['/login']);
     }
 
     const incomeData = localStorage.getItem('incomeData');
     if (incomeData) {
       this.incomeList = JSON.parse(incomeData);
+      console.log('[DashboardComponent] Loaded income data:', this.incomeList.length, 'items');
     }
 
     const expenseData = localStorage.getItem('expenseData');
     if (expenseData) {
       this.expenseList = JSON.parse(expenseData);
+      console.log('[DashboardComponent] Loaded expense data:', this.expenseList.length, 'items');
     }
 
     const budgetData = localStorage.getItem('budgetData');
     if (budgetData) {
       this.budgetList = JSON.parse(budgetData);
+      console.log('[DashboardComponent] Loaded budget data:', this.budgetList.length, 'items');
       this.updateBudgetSpending();
     }
   }
@@ -177,144 +201,263 @@ export class DashboardComponent {
   }
 
   initCharts() {
-    setTimeout(() => {
-      this.initPieChart();
-      this.initLineChart();
-    }, 100);
+    console.log('[DashboardComponent] initCharts called');
+    try {
+      console.log('[DashboardComponent] Setting timeout for chart initialization');
+      setTimeout(() => {
+        console.log('[DashboardComponent] Timeout fired, starting pie chart');
+        this.initPieChart();
+        console.log('[DashboardComponent] Pie chart done, starting line chart');
+        this.initLineChart();
+        console.log('[DashboardComponent] Line chart done, all charts initialized');
+      }, 100);
+    } catch (error) {
+      console.error('[DashboardComponent] Error in initCharts:', error);
+    }
   }
 
   initPieChart() {
-    const ctx = document.getElementById('expensePieChart');
-    if (!ctx) return;
+    console.log('[DashboardComponent] initPieChart called');
+    try {
+      console.log('[DashboardComponent] Getting canvas element');
+      const ctx = document.getElementById('expensePieChart') as HTMLCanvasElement;
+      console.log('[DashboardComponent] Canvas element:', ctx);
+      if (!ctx) {
+        console.log('[DashboardComponent] Canvas element not found, skipping pie chart');
+        return;
+      }
 
-    const categoryTotals = {};
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+      console.log('[DashboardComponent] Calculating category totals');
+      const categoryTotals = {};
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
 
-    this.expenseList
-      .filter(expense => {
-        const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === currentMonth && 
-               expenseDate.getFullYear() === currentYear;
-      })
-      .forEach(expense => {
-        if (!categoryTotals[expense.category]) {
-          categoryTotals[expense.category] = 0;
-        }
-        categoryTotals[expense.category] += expense.amount;
-      });
+      this.expenseList
+        .filter(expense => {
+          const expenseDate = new Date(expense.date);
+          return expenseDate.getMonth() === currentMonth && 
+                 expenseDate.getFullYear() === currentYear;
+        })
+        .forEach(expense => {
+          if (!categoryTotals[expense.category]) {
+            categoryTotals[expense.category] = 0;
+          }
+          categoryTotals[expense.category] += expense.amount;
+        });
 
-    const labels = Object.keys(categoryTotals).map(cat => this.formatCategory(cat));
-    const data = Object.values(categoryTotals);
-    const colors = [
-      '#667eea', '#764ba2', '#e74c3c', '#27ae60', 
-      '#f39c12', '#3498db', '#9b59b6', '#1abc9c'
-    ];
+      console.log('[DashboardComponent] Category totals:', categoryTotals);
+      const labels = Object.keys(categoryTotals).map(cat => this.formatCategory(cat));
+      const data = Object.values(categoryTotals);
+      const colors = [
+        '#667eea', '#764ba2', '#e74c3c', '#27ae60', 
+        '#f39c12', '#3498db', '#9b59b6', '#1abc9c'
+      ];
 
-    if (this.pieChart) {
-      this.pieChart.destroy();
-    }
+      if (this.pieChart) {
+        console.log('[DashboardComponent] Destroying existing pie chart');
+        this.pieChart.destroy();
+      }
 
-    this.pieChart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: data,
-          backgroundColor: colors.slice(0, labels.length),
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom'
+      console.log('[DashboardComponent] Creating new pie chart');
+      this.pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
           }
         }
-      }
-    });
+      });
+      console.log('[DashboardComponent] Pie chart created successfully');
+    } catch (error) {
+      console.error('[DashboardComponent] Error initializing pie chart:', error);
+    }
   }
 
   initLineChart() {
-    const ctx = document.getElementById('trendLineChart');
-    if (!ctx) return;
+    console.log('[DashboardComponent] initLineChart called');
+    try {
+      console.log('[DashboardComponent] Getting canvas element');
+      const ctx = document.getElementById('trendLineChart') as HTMLCanvasElement;
+      console.log('[DashboardComponent] Canvas element:', ctx);
+      if (!ctx) {
+        console.log('[DashboardComponent] Canvas element not found, skipping line chart');
+        return;
+      }
 
-    const months = [];
-    const incomeData = [];
-    const expenseData = [];
+      console.log('[DashboardComponent] Calculating data for tab:', this.selectedTab);
+      let labels = [];
+      let incomeData = [];
+      let expenseData = [];
 
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const month = date.getMonth();
-      const year = date.getFullYear();
-      
-      months.push(date.toLocaleDateString('en-US', { month: 'short' }));
+      if (this.selectedTab === 'week') {
+        const weekData = this.getWeeklyData();
+        labels = weekData.labels;
+        incomeData = weekData.incomeData;
+        expenseData = weekData.expenseData;
+      } else if (this.selectedTab === 'month') {
+        const monthData = this.getMonthlyData();
+        labels = monthData.labels;
+        incomeData = monthData.incomeData;
+        expenseData = monthData.expenseData;
+      } else if (this.selectedTab === 'year') {
+        const yearData = this.getYearlyData();
+        labels = yearData.labels;
+        incomeData = yearData.incomeData;
+        expenseData = yearData.expenseData;
+      }
 
-      const monthIncome = this.incomeList
-        .filter(income => {
-          const incomeDate = new Date(income.date);
-          return incomeDate.getMonth() === month && 
-                 incomeDate.getFullYear() === year;
-        })
-        .reduce((total, income) => total + income.amount, 0);
+      console.log('[DashboardComponent] Data calculated:', { labels, incomeData, expenseData });
 
-      const monthExpense = this.expenseList
-        .filter(expense => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate.getMonth() === month && 
-                 expenseDate.getFullYear() === year;
-        })
-        .reduce((total, expense) => total + expense.amount, 0);
+      if (this.lineChart) {
+        console.log('[DashboardComponent] Destroying existing line chart');
+        this.lineChart.destroy();
+      }
 
-      incomeData.push(monthIncome);
-      expenseData.push(monthExpense);
-    }
-
-    if (this.lineChart) {
-      this.lineChart.destroy();
-    }
-
-    this.lineChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: months,
-        datasets: [
-          {
-            label: 'Income',
-            data: incomeData,
-            borderColor: '#27ae60',
-            backgroundColor: 'rgba(39, 174, 96, 0.1)',
-            fill: true,
-            tension: 0.4
-          },
-          {
-            label: 'Expenses',
-            data: expenseData,
-            borderColor: '#e74c3c',
-            backgroundColor: 'rgba(231, 76, 60, 0.1)',
-            fill: true,
-            tension: 0.4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom'
-          }
+      console.log('[DashboardComponent] Creating new line chart');
+      this.lineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Income',
+              data: incomeData,
+              borderColor: '#27ae60',
+              backgroundColor: 'rgba(39, 174, 96, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Expenses',
+              data: expenseData,
+              borderColor: '#e74c3c',
+              backgroundColor: 'rgba(231, 76, 60, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
         },
-        scales: {
-          y: {
-            beginAtZero: true
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
           }
         }
+      });
+      console.log('[DashboardComponent] Line chart created successfully');
+    } catch (error) {
+      console.error('[DashboardComponent] Error initializing line chart:', error);
+    }
+  }
+
+  getWeeklyData() {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const incomeData = [0, 0, 0, 0, 0, 0, 0];
+    const expenseData = [0, 0, 0, 0, 0, 0, 0];
+
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Get Monday of current week
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+    monday.setHours(0, 0, 0, 0);
+
+    // Get Sunday of current week
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    this.incomeList.forEach(income => {
+      const incomeDate = new Date(income.date);
+      if (incomeDate >= monday && incomeDate <= sunday) {
+        const dayIndex = incomeDate.getDay() === 0 ? 6 : incomeDate.getDay() - 1;
+        incomeData[dayIndex] += income.amount;
       }
     });
+
+    this.expenseList.forEach(expense => {
+      const expenseDate = new Date(expense.date);
+      if (expenseDate >= monday && expenseDate <= sunday) {
+        const dayIndex = expenseDate.getDay() === 0 ? 6 : expenseDate.getDay() - 1;
+        expenseData[dayIndex] += expense.amount;
+      }
+    });
+
+    return { labels: days, incomeData, expenseData };
+  }
+
+  getMonthlyData() {
+    const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    const incomeData = [0, 0, 0, 0];
+    const expenseData = [0, 0, 0, 0];
+
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    this.incomeList.forEach(income => {
+      const incomeDate = new Date(income.date);
+      if (incomeDate.getMonth() === currentMonth && incomeDate.getFullYear() === currentYear) {
+        const dayOfMonth = incomeDate.getDate();
+        const weekIndex = Math.min(Math.floor((dayOfMonth - 1) / 7), 3);
+        incomeData[weekIndex] += income.amount;
+      }
+    });
+
+    this.expenseList.forEach(expense => {
+      const expenseDate = new Date(expense.date);
+      if (expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear) {
+        const dayOfMonth = expenseDate.getDate();
+        const weekIndex = Math.min(Math.floor((dayOfMonth - 1) / 7), 3);
+        expenseData[weekIndex] += expense.amount;
+      }
+    });
+
+    return { labels: weeks, incomeData, expenseData };
+  }
+
+  getYearlyData() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const incomeData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const expenseData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    const currentYear = new Date().getFullYear();
+
+    this.incomeList.forEach(income => {
+      const incomeDate = new Date(income.date);
+      if (incomeDate.getFullYear() === currentYear) {
+        incomeData[incomeDate.getMonth()] += income.amount;
+      }
+    });
+
+    this.expenseList.forEach(expense => {
+      const expenseDate = new Date(expense.date);
+      if (expenseDate.getFullYear() === currentYear) {
+        expenseData[expenseDate.getMonth()] += expense.amount;
+      }
+    });
+
+    return { labels: months, incomeData, expenseData };
   }
 }

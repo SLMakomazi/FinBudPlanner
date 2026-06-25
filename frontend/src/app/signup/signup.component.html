@@ -1,0 +1,69 @@
+<div class="signup-container">
+  <div class="signup-card">
+    <h2>Sign Up</h2>
+    <p class="subtitle">Create your FinBudPlanner account</p>
+    
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+    
+    <form (ngSubmit)="onSignup()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          class="form-control" 
+          [(ngModel)]="username" 
+          name="username" 
+          required
+          placeholder="Enter your username"
+        >
+        <small class="form-text text-muted">
+          Must be at least 3 characters, start with a letter, and contain only letters, numbers, and underscores
+        </small>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          class="form-control" 
+          [(ngModel)]="password" 
+          name="password" 
+          required
+          placeholder="Enter your password"
+        >
+        <small class="form-text text-muted">
+          Must be at least 8 characters with uppercase, lowercase, digit, and special character
+        </small>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input 
+          type="password" 
+          id="confirmPassword" 
+          class="form-control" 
+          [(ngModel)]="confirmPassword" 
+          name="confirmPassword" 
+          required
+          placeholder="Confirm your password"
+        >
+      </div>
+      
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
+        {{ isLoading ? 'Creating account...' : 'Sign Up' }}
+      </button>
+    </form>
+    
+    <p class="login-link">
+      Already have an account? <a routerLink="/login">Login here</a>
+    </p>
+  </div>
+</div>

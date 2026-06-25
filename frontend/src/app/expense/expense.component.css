@@ -11,6 +11,11 @@
   margin-bottom: 30px;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
 .header h1 {
   color: white;
   font-size: 32px;

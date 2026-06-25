@@ -1,9 +1,12 @@
 <div class="budget-container">
   <div class="header">
     <h1>Budget Management</h1>
-    <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
-      {{ showAddForm ? 'Cancel' : 'Set Budget' }}
-    </button>
+    <div class="header-buttons">
+      <button class="btn btn-secondary" routerLink="/dashboard">Back to Dashboard</button>
+      <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
+        {{ showAddForm ? 'Cancel' : 'Set Budget' }}
+      </button>
+    </div>
   </div>
 
   <div *ngIf="showAddForm" class="card add-form">

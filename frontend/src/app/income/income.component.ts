@@ -20,24 +20,35 @@ export class IncomeComponent {
   router;
 
   constructor(router: Router) {
+    console.log('[IncomeComponent] Constructor called');
     this.router = router;
     this.loadIncomeData();
     this.setDefaultDate();
   }
 
+  ngOnInit() {
+    console.log('[IncomeComponent] ngOnInit called');
+  }
+
   setDefaultDate() {
     const today = new Date();
     this.newIncome.date = today.toISOString().split('T')[0];
+    console.log('[IncomeComponent] Default date set:', this.newIncome.date);
   }
 
   loadIncomeData() {
+    console.log('[IncomeComponent] Loading income data');
     const storedData = localStorage.getItem('incomeData');
     if (storedData) {
       this.incomeList = JSON.parse(storedData);
+      console.log('[IncomeComponent] Loaded', this.incomeList.length, 'income records');
+    } else {
+      console.log('[IncomeComponent] No income data found');
     }
   }
 
   saveIncomeData() {
+    console.log('[IncomeComponent] Saving income data', this.incomeList.length, 'records');
     localStorage.setItem('incomeData', JSON.stringify(this.incomeList));
   }
 
@@ -61,13 +72,17 @@ export class IncomeComponent {
   }
 
   onAddIncome() {
+    console.log('[IncomeComponent] onAddIncome called', this.newIncome);
+    
     if (!this.newIncome.source || !this.newIncome.amount || !this.newIncome.date || !this.newIncome.category) {
       this.errorMessage = 'Please fill in all fields';
+      console.log('[IncomeComponent] Validation failed: missing fields');
       return;
     }
 
     if (this.newIncome.amount <= 0) {
       this.errorMessage = 'Amount must be greater than 0';
+      console.log('[IncomeComponent] Validation failed: amount <= 0');
       return;
     }
 
@@ -79,6 +94,7 @@ export class IncomeComponent {
       category: this.newIncome.category
     };
 
+    console.log('[IncomeComponent] Adding income record:', income);
     this.incomeList.push(income);
     this.saveIncomeData();
     
@@ -92,12 +108,15 @@ export class IncomeComponent {
     this.setDefaultDate();
     this.showAddForm = false;
     this.errorMessage = '';
+    console.log('[IncomeComponent] Income added successfully');
   }
 
   deleteIncome(id) {
+    console.log('[IncomeComponent] deleteIncome called for id:', id);
     if (confirm('Are you sure you want to delete this income record?')) {
       this.incomeList = this.incomeList.filter(income => income.id !== id);
       this.saveIncomeData();
+      console.log('[IncomeComponent] Income deleted successfully');
     }
   }
 

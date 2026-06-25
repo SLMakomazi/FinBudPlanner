@@ -7,4 +7,12 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'FinBudPlanner';
+
+  constructor() {
+    console.log('[AppComponent] Constructor called');
+  }
+
+  ngOnInit() {
+    console.log('[AppComponent] ngOnInit called');
+  }
 }
