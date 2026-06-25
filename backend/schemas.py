@@ -93,6 +93,7 @@ class Budget(BudgetBase):
     id: int
     user_id: int
     created_at: datetime
+    spent: float = 0.0
 
     class Config:
         from_attributes = True

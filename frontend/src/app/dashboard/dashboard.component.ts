@@ -2,6 +2,7 @@ import { Component, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Chart } from 'chart.js/auto';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,13 +16,17 @@ export class DashboardComponent implements AfterViewInit {
   budgetList = [];
 
   router;
+  http;
   pieChart;
   lineChart;
   selectedTab = 'week'; // 'week', 'month', 'year'
+  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
+  
 
-  constructor(router: Router) {
+  constructor(router: Router, http: HttpClient) {
     console.log('[DashboardComponent] Constructor called');
     this.router = router;
+    this.http = http;
     this.loadUserData();
   }
 
@@ -52,24 +57,39 @@ export class DashboardComponent implements AfterViewInit {
       this.router.navigate(['/login']);
     }
 
-    const incomeData = localStorage.getItem('incomeData');
-    if (incomeData) {
-      this.incomeList = JSON.parse(incomeData);
-      console.log('[DashboardComponent] Loaded income data:', this.incomeList.length, 'items');
-    }
+    // Load data from backend
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    this.http.get(`${this.apiUrl[0]}/income`, { headers }).subscribe({
+      next: (data: any) => {
+        this.incomeList = data;
+        console.log('[DashboardComponent] Loaded income data:', this.incomeList.length, 'items from backend');
+      },
+      error: (error) => {
+        console.error('[DashboardComponent] Error loading income data:', error);
+      }
+    });
 
-    const expenseData = localStorage.getItem('expenseData');
-    if (expenseData) {
-      this.expenseList = JSON.parse(expenseData);
-      console.log('[DashboardComponent] Loaded expense data:', this.expenseList.length, 'items');
-    }
+    this.http.get(`${this.apiUrl[0]}/expense`, { headers }).subscribe({
+      next: (data: any) => {
+        this.expenseList = data;
+        console.log('[DashboardComponent] Loaded expense data:', this.expenseList.length, 'items from backend');
+      },
+      error: (error) => {
+        console.error('[DashboardComponent] Error loading expense data:', error);
+      }
+    });
 
-    const budgetData = localStorage.getItem('budgetData');
-    if (budgetData) {
-      this.budgetList = JSON.parse(budgetData);
-      console.log('[DashboardComponent] Loaded budget data:', this.budgetList.length, 'items');
-      this.updateBudgetSpending();
-    }
+    this.http.get(`${this.apiUrl[0]}/budget`, { headers }).subscribe({
+      next: (data: any) => {
+        this.budgetList = data;
+        console.log('[DashboardComponent] Loaded budget data:', this.budgetList.length, 'items from backend');
+      },
+      error: (error) => {
+        console.error('[DashboardComponent] Error loading budget data:', error);
+      }
+    });
   }
 
   updateBudgetSpending() {

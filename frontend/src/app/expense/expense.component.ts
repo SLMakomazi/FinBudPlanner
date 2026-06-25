@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-expense',
@@ -18,10 +19,13 @@ export class ExpenseComponent {
   };
 
   router;
+  http;
+  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
 
-  constructor(router: Router) {
+  constructor(router: Router, http: HttpClient) {
     console.log('[ExpenseComponent] Constructor called');
     this.router = router;
+    this.http = http;
     this.loadExpenseData();
     this.setDefaultDate();
   }
@@ -37,19 +41,24 @@ export class ExpenseComponent {
   }
 
   loadExpenseData() {
-    console.log('[ExpenseComponent] Loading expense data');
-    const storedData = localStorage.getItem('expenseData');
-    if (storedData) {
-      this.expenseList = JSON.parse(storedData);
-      console.log('[ExpenseComponent] Loaded', this.expenseList.length, 'expense records');
-    } else {
-      console.log('[ExpenseComponent] No expense data found');
-    }
+    console.log('[ExpenseComponent] Loading expense data from backend');
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    this.http.get(`${this.apiUrl[0]}/expense`, { headers }).subscribe({
+      next: (data: any) => {
+        this.expenseList = data;
+        console.log('[ExpenseComponent] Loaded', this.expenseList.length, 'expense records from backend');
+      },
+      error: (error) => {
+        console.error('[ExpenseComponent] Error loading expense data:', error);
+        this.errorMessage = 'Failed to load expense data. Please check your connection.';
+      }
+    });
   }
 
   saveExpenseData() {
-    console.log('[ExpenseComponent] Saving expense data', this.expenseList.length, 'records');
-    localStorage.setItem('expenseData', JSON.stringify(this.expenseList));
+    console.log('[ExpenseComponent] saveExpenseData - using backend API, no localStorage save needed');
   }
 
   get totalMonthlyExpenses() {
@@ -87,36 +96,55 @@ export class ExpenseComponent {
     }
 
     const expense = {
-      id: Date.now(),
       description: this.newExpense.description,
       amount: Number(this.newExpense.amount),
-      date: this.newExpense.date,
+      date: new Date(this.newExpense.date).toISOString(),
       category: this.newExpense.category
     };
 
-    console.log('[ExpenseComponent] Adding expense record:', expense);
-    this.expenseList.push(expense);
-    this.saveExpenseData();
+    console.log('[ExpenseComponent] Adding expense record via backend:', expense);
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    // Reset form
-    this.newExpense = {
-      description: '',
-      amount: 0,
-      date: '',
-      category: ''
-    };
-    this.setDefaultDate();
-    this.showAddForm = false;
-    this.errorMessage = '';
-    console.log('[ExpenseComponent] Expense added successfully');
+    this.http.post(`${this.apiUrl}/expense`, expense, { headers }).subscribe({
+      next: (data: any) => {
+        console.log('[ExpenseComponent] Expense added successfully via backend:', data);
+        this.expenseList.push(data);
+        
+        // Reset form
+        this.newExpense = {
+          description: '',
+          amount: 0,
+          date: '',
+          category: ''
+        };
+        this.setDefaultDate();
+        this.showAddForm = false;
+        this.errorMessage = '';
+      },
+      error: (error) => {
+        console.error('[ExpenseComponent] Error adding expense:', error);
+        this.errorMessage = 'Failed to add expense. Please try again.';
+      }
+    });
   }
 
   deleteExpense(id) {
     console.log('[ExpenseComponent] deleteExpense called for id:', id);
     if (confirm('Are you sure you want to delete this expense record?')) {
-      this.expenseList = this.expenseList.filter(expense => expense.id !== id);
-      this.saveExpenseData();
-      console.log('[ExpenseComponent] Expense deleted successfully');
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      
+      this.http.delete(`${this.apiUrl}/expense/${id}`, { headers }).subscribe({
+        next: () => {
+          console.log('[ExpenseComponent] Expense deleted successfully via backend');
+          this.expenseList = this.expenseList.filter(expense => expense.id !== id);
+        },
+        error: (error) => {
+          console.error('[ExpenseComponent] Error deleting expense:', error);
+          alert('Failed to delete expense. Please try again.');
+        }
+      });
     }
   }
 

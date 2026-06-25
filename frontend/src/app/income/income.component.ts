@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-income',
@@ -18,10 +19,13 @@ export class IncomeComponent {
   };
 
   router;
+  http;
+  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
 
-  constructor(router: Router) {
+  constructor(router: Router, http: HttpClient) {
     console.log('[IncomeComponent] Constructor called');
     this.router = router;
+    this.http = http;
     this.loadIncomeData();
     this.setDefaultDate();
   }
@@ -37,19 +41,24 @@ export class IncomeComponent {
   }
 
   loadIncomeData() {
-    console.log('[IncomeComponent] Loading income data');
-    const storedData = localStorage.getItem('incomeData');
-    if (storedData) {
-      this.incomeList = JSON.parse(storedData);
-      console.log('[IncomeComponent] Loaded', this.incomeList.length, 'income records');
-    } else {
-      console.log('[IncomeComponent] No income data found');
-    }
+    console.log('[IncomeComponent] Loading income data from backend');
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    this.http.get(`${this.apiUrl[0]}/income`, { headers }).subscribe({
+      next: (data: any) => {
+        this.incomeList = data;
+        console.log('[IncomeComponent] Loaded', this.incomeList.length, 'income records from backend');
+      },
+      error: (error) => {
+        console.error('[IncomeComponent] Error loading income data:', error);
+        this.errorMessage = 'Failed to load income data. Please check your connection.';
+      }
+    });
   }
 
   saveIncomeData() {
-    console.log('[IncomeComponent] Saving income data', this.incomeList.length, 'records');
-    localStorage.setItem('incomeData', JSON.stringify(this.incomeList));
+    console.log('[IncomeComponent] saveIncomeData - using backend API, no localStorage save needed');
   }
 
   get totalMonthlyIncome() {
@@ -87,36 +96,55 @@ export class IncomeComponent {
     }
 
     const income = {
-      id: Date.now(),
       source: this.newIncome.source,
       amount: Number(this.newIncome.amount),
-      date: this.newIncome.date,
+      date: new Date(this.newIncome.date).toISOString(),
       category: this.newIncome.category
     };
 
-    console.log('[IncomeComponent] Adding income record:', income);
-    this.incomeList.push(income);
-    this.saveIncomeData();
+    console.log('[IncomeComponent] Adding income record via backend:', income);
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    // Reset form
-    this.newIncome = {
-      source: '',
-      amount: 0,
-      date: '',
-      category: ''
-    };
-    this.setDefaultDate();
-    this.showAddForm = false;
-    this.errorMessage = '';
-    console.log('[IncomeComponent] Income added successfully');
+    this.http.post(`${this.apiUrl}/income`, income, { headers }).subscribe({
+      next: (data: any) => {
+        console.log('[IncomeComponent] Income added successfully via backend:', data);
+        this.incomeList.push(data);
+        
+        // Reset form
+        this.newIncome = {
+          source: '',
+          amount: 0,
+          date: '',
+          category: ''
+        };
+        this.setDefaultDate();
+        this.showAddForm = false;
+        this.errorMessage = '';
+      },
+      error: (error) => {
+        console.error('[IncomeComponent] Error adding income:', error);
+        this.errorMessage = 'Failed to add income. Please try again.';
+      }
+    });
   }
 
   deleteIncome(id) {
     console.log('[IncomeComponent] deleteIncome called for id:', id);
     if (confirm('Are you sure you want to delete this income record?')) {
-      this.incomeList = this.incomeList.filter(income => income.id !== id);
-      this.saveIncomeData();
-      console.log('[IncomeComponent] Income deleted successfully');
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      
+      this.http.delete(`${this.apiUrl}/income/${id}`, { headers }).subscribe({
+        next: () => {
+          console.log('[IncomeComponent] Income deleted successfully via backend');
+          this.incomeList = this.incomeList.filter(income => income.id !== id);
+        },
+        error: (error) => {
+          console.error('[IncomeComponent] Error deleting income:', error);
+          alert('Failed to delete income. Please try again.');
+        }
+      });
     }
   }
 

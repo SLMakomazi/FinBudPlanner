@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-budget',
@@ -16,12 +17,16 @@ export class BudgetComponent {
   };
 
   router;
+  http;
+ 
+  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
 
-  constructor(router: Router) {
+
+  constructor(router: Router, http: HttpClient) {
     console.log('[BudgetComponent] Constructor called');
     this.router = router;
+    this.http = http;
     this.loadBudgetData();
-    this.updateBudgetSpending();
   }
 
   ngOnInit() {
@@ -29,49 +34,28 @@ export class BudgetComponent {
   }
 
   loadBudgetData() {
-    console.log('[BudgetComponent] Loading budget data');
-    const storedData = localStorage.getItem('budgetData');
-    if (storedData) {
-      this.budgetList = JSON.parse(storedData);
-      console.log('[BudgetComponent] Loaded', this.budgetList.length, 'budget records');
-    } else {
-      console.log('[BudgetComponent] No budget data found');
-    }
+    console.log('[BudgetComponent] Loading budget data from backend');
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    this.http.get(`${this.apiUrl[0]}/budget`, { headers }).subscribe({
+      next: (data: any) => {
+        this.budgetList = data;
+        console.log('[BudgetComponent] Loaded', this.budgetList.length, 'budget records from backend');
+      },
+      error: (error) => {
+        console.error('[BudgetComponent] Error loading budget data:', error);
+        this.errorMessage = 'Failed to load budget data. Please check your connection.';
+      }
+    });
   }
 
   saveBudgetData() {
-    console.log('[BudgetComponent] Saving budget data', this.budgetList.length, 'records');
-    localStorage.setItem('budgetData', JSON.stringify(this.budgetList));
+    console.log('[BudgetComponent] saveBudgetData - using backend API, no localStorage save needed');
   }
 
   updateBudgetSpending() {
-    console.log('[BudgetComponent] Updating budget spending');
-    // Load expense data to calculate spending
-    const expenseData = localStorage.getItem('expenseData');
-    const expenses = expenseData ? JSON.parse(expenseData) : [];
-    console.log('[BudgetComponent] Loaded', expenses.length, 'expense records for budget calculation');
-    
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    
-    this.budgetList = this.budgetList.map(budget => {
-      const categoryExpenses = expenses
-        .filter(expense => {
-          const expenseDate = new Date(expense.date);
-          return expense.category === budget.category &&
-                 expenseDate.getMonth() === currentMonth &&
-                 expenseDate.getFullYear() === currentYear;
-        })
-        .reduce((total, expense) => total + expense.amount, 0);
-      
-      return {
-        ...budget,
-        spent: categoryExpenses
-      };
-    });
-    
-    this.saveBudgetData();
-    console.log('[BudgetComponent] Budget spending updated');
+    console.log('[BudgetComponent] Budget spending is calculated by backend, no local calculation needed');
   }
 
   onAddBudget() {
@@ -89,41 +73,55 @@ export class BudgetComponent {
       return;
     }
 
-    // Check if budget for this category already exists
-    const existingBudget = this.budgetList.find(b => b.category === this.newBudget.category);
-    if (existingBudget) {
-      this.errorMessage = 'Budget for this category already exists. Delete it first to set a new one.';
-      console.log('[BudgetComponent] Validation failed: budget already exists for category');
-      return;
-    }
-
     const budget = {
-      id: Date.now(),
       category: this.newBudget.category,
-      limit: Number(this.newBudget.limit),
-      spent: 0
+      limit: Number(this.newBudget.limit)
     };
 
-    console.log('[BudgetComponent] Adding budget record:', budget);
-    this.budgetList.push(budget);
-    this.saveBudgetData();
+    console.log('[BudgetComponent] Adding budget record via backend:', budget);
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    // Reset form
-    this.newBudget = {
-      category: '',
-      limit: 0
-    };
-    this.showAddForm = false;
-    this.errorMessage = '';
-    console.log('[BudgetComponent] Budget added successfully');
+    this.http.post(`${this.apiUrl[0]}/budget`, budget, { headers }).subscribe({
+      next: (data: any) => {
+        console.log('[BudgetComponent] Budget added successfully via backend:', data);
+        this.budgetList.push(data);
+        
+        // Reset form
+        this.newBudget = {
+          category: '',
+          limit: 0
+        };
+        this.showAddForm = false;
+        this.errorMessage = '';
+      },
+      error: (error) => {
+        console.error('[BudgetComponent] Error adding budget:', error);
+        if (error.status === 400) {
+          this.errorMessage = 'Budget for this category already exists. Delete it first to set a new one.';
+        } else {
+          this.errorMessage = 'Failed to add budget. Please try again.';
+        }
+      }
+    });
   }
 
   deleteBudget(id) {
     console.log('[BudgetComponent] deleteBudget called for id:', id);
     if (confirm('Are you sure you want to delete this budget?')) {
-      this.budgetList = this.budgetList.filter(budget => budget.id !== id);
-      this.saveBudgetData();
-      console.log('[BudgetComponent] Budget deleted successfully');
+      const token = localStorage.getItem('token');
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      
+      this.http.delete(`${this.apiUrl[0]}/budget/${id}`, { headers }).subscribe({
+        next: () => {
+          console.log('[BudgetComponent] Budget deleted successfully via backend');
+          this.budgetList = this.budgetList.filter(budget => budget.id !== id);
+        },
+        error: (error) => {
+          console.error('[BudgetComponent] Error deleting budget:', error);
+          alert('Failed to delete budget. Please try again.');
+        }
+      });
     }
   }
 
