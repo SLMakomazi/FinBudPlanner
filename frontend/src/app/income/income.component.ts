@@ -20,7 +20,7 @@ export class IncomeComponent {
 
   router;
   http;
-  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
+  apiUrl = 'http://localhost:8000/api';
 
   constructor(router: Router, http: HttpClient) {
     console.log('[IncomeComponent] Constructor called');
@@ -45,7 +45,7 @@ export class IncomeComponent {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    this.http.get(`${this.apiUrl[0]}/income`, { headers }).subscribe({
+    this.http.get(`${this.apiUrl}/income`, { headers }).subscribe({
       next: (data: any) => {
         this.incomeList = data;
         console.log('[IncomeComponent] Loaded', this.incomeList.length, 'income records from backend');

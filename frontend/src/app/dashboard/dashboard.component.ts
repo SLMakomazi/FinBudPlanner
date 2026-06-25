@@ -20,7 +20,8 @@ export class DashboardComponent implements AfterViewInit {
   pieChart;
   lineChart;
   selectedTab = 'week'; // 'week', 'month', 'year'
-  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
+  apiUrl = 'http://localhost:8000/api';
+  
   
 
   constructor(router: Router, http: HttpClient) {
@@ -61,7 +62,7 @@ export class DashboardComponent implements AfterViewInit {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    this.http.get(`${this.apiUrl[0]}/income`, { headers }).subscribe({
+    this.http.get(`${this.apiUrl}/income`, { headers }).subscribe({
       next: (data: any) => {
         this.incomeList = data;
         console.log('[DashboardComponent] Loaded income data:', this.incomeList.length, 'items from backend');
@@ -71,7 +72,7 @@ export class DashboardComponent implements AfterViewInit {
       }
     });
 
-    this.http.get(`${this.apiUrl[0]}/expense`, { headers }).subscribe({
+    this.http.get(`${this.apiUrl}/expense`, { headers }).subscribe({
       next: (data: any) => {
         this.expenseList = data;
         console.log('[DashboardComponent] Loaded expense data:', this.expenseList.length, 'items from backend');
@@ -81,7 +82,7 @@ export class DashboardComponent implements AfterViewInit {
       }
     });
 
-    this.http.get(`${this.apiUrl[0]}/budget`, { headers }).subscribe({
+    this.http.get(`${this.apiUrl}/budget`, { headers }).subscribe({
       next: (data: any) => {
         this.budgetList = data;
         console.log('[DashboardComponent] Loaded budget data:', this.budgetList.length, 'items from backend');

@@ -18,9 +18,7 @@ export class BudgetComponent {
 
   router;
   http;
- 
-  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
-
+  apiUrl = 'http://localhost:8000/api';
 
   constructor(router: Router, http: HttpClient) {
     console.log('[BudgetComponent] Constructor called');
@@ -38,7 +36,7 @@ export class BudgetComponent {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    this.http.get(`${this.apiUrl[0]}/budget`, { headers }).subscribe({
+    this.http.get(`${this.apiUrl}/budget`, { headers }).subscribe({
       next: (data: any) => {
         this.budgetList = data;
         console.log('[BudgetComponent] Loaded', this.budgetList.length, 'budget records from backend');
@@ -82,7 +80,7 @@ export class BudgetComponent {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    this.http.post(`${this.apiUrl[0]}/budget`, budget, { headers }).subscribe({
+    this.http.post(`${this.apiUrl}/budget`, budget, { headers }).subscribe({
       next: (data: any) => {
         console.log('[BudgetComponent] Budget added successfully via backend:', data);
         this.budgetList.push(data);
@@ -112,7 +110,7 @@ export class BudgetComponent {
       const token = localStorage.getItem('token');
       const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
       
-      this.http.delete(`${this.apiUrl[0]}/budget/${id}`, { headers }).subscribe({
+      this.http.delete(`${this.apiUrl}/budget/${id}`, { headers }).subscribe({
         next: () => {
           console.log('[BudgetComponent] Budget deleted successfully via backend');
           this.budgetList = this.budgetList.filter(budget => budget.id !== id);

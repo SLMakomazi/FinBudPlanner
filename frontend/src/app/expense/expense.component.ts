@@ -20,7 +20,7 @@ export class ExpenseComponent {
 
   router;
   http;
-  apiUrl = ['http://127.0.0.1:8000/api','http://localhost:8000/api'];
+  apiUrl = 'http://localhost:8000/api';
 
   constructor(router: Router, http: HttpClient) {
     console.log('[ExpenseComponent] Constructor called');
@@ -45,7 +45,7 @@ export class ExpenseComponent {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    this.http.get(`${this.apiUrl[0]}/expense`, { headers }).subscribe({
+    this.http.get(`${this.apiUrl}/expense`, { headers }).subscribe({
       next: (data: any) => {
         this.expenseList = data;
         console.log('[ExpenseComponent] Loaded', this.expenseList.length, 'expense records from backend');
