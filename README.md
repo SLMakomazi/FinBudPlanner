@@ -21,13 +21,7 @@ FinBudPlanner/
 python start.py
 ```
 
-### Option 2: Bash Script (Linux/Mac)
-
-```bash
-./start.sh
-```
-
-### Option 3: Manual Start
+### Option 2: Manual Start
 
 **Backend:**
 ```bash
