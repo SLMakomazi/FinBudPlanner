@@ -1,8 +1,6 @@
 """
 Database configuration and session management for FinBudPlanner backend.
-
-This module sets up the SQLAlchemy database engine, session factory,
-and provides a dependency for getting database sessions in FastAPI endpoints.
+Docker-safe + local-safe SQLite setup.
 """
 
 from sqlalchemy import create_engine
@@ -10,42 +8,54 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Database path in the database folder
-# Constructs path to ../database/finbud.db relative to this file
-DATABASE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database', 'finbud.db')
+# ==============================
+# 1. Build safe database path
+# ==============================
 
-# SQLAlchemy database URL for SQLite
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_DIR = os.path.join(BASE_DIR, "database")
 
-# Create the database engine
-# check_same_thread=False is required for SQLite to allow multiple threads
+# Ensure directory exists (CRITICAL for Docker)
+os.makedirs(DB_DIR, exist_ok=True)
+
+DB_PATH = os.path.join(DB_DIR, "finbud.db")
+
+# ==============================
+# 2. SQLite URL
+# ==============================
+
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+
+# ==============================
+# 3. Engine
+# ==============================
+
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False}
 )
 
-# Create a session factory for database sessions
-# autocommit=False and autoflush=False for manual transaction control
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# ==============================
+# 4. Session
+# ==============================
 
-# Base class for all ORM models
-# All database models will inherit from this Base class
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+# ==============================
+# 5. Base ORM
+# ==============================
+
 Base = declarative_base()
 
+# ==============================
+# 6. Dependency
+# ==============================
+
 def get_db():
-    """
-    Dependency function for FastAPI to get database sessions.
-    
-    This function is used as a dependency in FastAPI endpoints to provide
-    a database session. It ensures proper session cleanup after each request.
-    
-    Yields:
-        Session: SQLAlchemy database session
-        
-    Example:
-        @app.get("/users")
-        def get_users(db: Session = Depends(get_db)):
-            return db.query(User).all()
-    """
     db = SessionLocal()
     try:
         yield db
