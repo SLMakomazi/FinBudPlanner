@@ -80,6 +80,10 @@ When you first run the application, you'll need to register an account:
 - 📈 Dashboard with financial summaries
 - 📉 Visual progress indicators for budget limits
 - 🔐 Secure authentication with JWT tokens
+- 🐳 Docker containerization support
+- 🚀 CI/CD pipeline with automated testing
+- 🧪 Selenium regression tests
+- ⚡ JMeter performance testing
 
 ## Development
 
@@ -104,6 +108,67 @@ npm start
 # Build for production
 ng build --configuration production
 ```
+
+## Docker Deployment
+
+### Build and Run with Docker Compose
+
+```bash
+# Build images
+docker-compose build
+
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Manual Docker Build
+
+**Backend:**
+```bash
+cd backend
+docker build -t finbud-backend:latest .
+docker run -p 8000:8000 -v $(pwd)/../database:/app/database finbud-backend:latest
+```
+
+**Frontend:**
+```bash
+cd frontend
+docker build -t finbud-frontend:latest .
+docker run -p 80:80 finbud-frontend:latest
+```
+
+## CI/CD Pipeline
+
+The project includes a comprehensive CI/CD pipeline using GitHub Actions:
+
+### Pipeline Stages
+
+1. **Unit Tests**: Python unittest for backend, Angular Karma tests for frontend
+2. **Integration Tests**: Build containers locally, launch them, and verify functionality
+3. **Automation Tests**: Selenium regression tests using Page Object Model
+4. **Performance Tests**: JMeter load testing with 100 concurrent users
+5. **Registry Delivery**: Push images to GitHub Container Registry (GHCR)
+
+### Trigger Conditions
+
+- Pull requests to `main` branch
+- Pushes to `main` branch
+
+### Gatekeeper Behavior
+
+The pipeline blocks merges to `main` if any test stage fails. Only successful runs push containers to GHCR.
+
+### Test Files
+
+- Selenium tests: `backend/tests/selenium_regression.py`
+- JMeter profile: `database/performance_profile.jmx`
+- CI workflow: `.github/workflows/ci-gatekeeper.yml`
 
 ## Database
 

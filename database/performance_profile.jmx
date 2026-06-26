@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Apache JMeter Test Plan for FinBudPlanner Backend API Performance Testing
+
+This JMeter test plan performs load testing on the backend API health endpoint.
+It simulates 100 concurrent users with a 60-second ramp-up time to test
+the API's performance under load.
+
+Configuration:
+- Target: http://localhost:8000/health (configurable via HOST and PORT properties)
+- Users: 100 concurrent virtual users
+- Ramp-up: 60 seconds (gradually increase load)
+- Assertion: HTTP 200 status code expected
+-->
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.2">
+  <hashTree>
+    <!-- Test Plan: Root element defining the test configuration -->
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="FinBudPlanner Performance Test" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for FinBudPlanner backend API</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <!-- User Defined Variables: Can be used to define custom variables -->
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <!-- Thread Group: Defines virtual users and load pattern -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+        <!-- Continue on error: Don't stop test if one sample fails -->
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <!-- Loop Controller: Controls how many times each thread executes -->
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <!-- Execute once per thread -->
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <!-- Number of Threads: 100 concurrent virtual users -->
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <!-- Ramp-up Time: 60 seconds to reach full load -->
+        <stringProp name="ThreadGroup.ramp_time">60</stringProp>
+        <!-- Scheduler: Disabled (test runs once) -->
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <!-- Same user on next iteration: Reuse same user session -->
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- HTTP Request Sampler: Makes HTTP requests to the target endpoint -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Health Check Request" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <!-- HTTP Arguments: Empty for GET request -->
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <!-- Target Host: Configurable via HOST property (default: localhost) -->
+          <stringProp name="HTTPSampler.domain">${__P(HOST,localhost)}</stringProp>
+          <!-- Target Port: Configurable via PORT property (default: 8000) -->
+          <stringProp name="HTTPSampler.port">${__P(PORT,8000)}</stringProp>
+          <!-- Protocol: HTTP -->
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <!-- Request Path: /health endpoint -->
+          <stringProp name="HTTPSampler.path">/health</stringProp>
+          <!-- HTTP Method: GET -->
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <!-- Follow Redirects: Follow HTTP 3xx redirects -->
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <!-- Keep-Alive: Reuse connections for better performance -->
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <!-- Connection/Response Timeout: Use defaults -->
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <!-- Response Assertion: Validates HTTP response code is 200 -->
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49586">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message"></stringProp>
+            <!-- Test Field: Response Code (HTTP status) -->
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <!-- Test Type: 8 = Contains (matches if response contains "200") -->
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <!-- View Results Tree: Visualizer for detailed request/response data -->
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <!-- Save Configuration: What data to save for each sample -->
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <!-- Summary Report: Aggregated statistics for all samples -->
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <!-- Save Configuration: Same as View Results Tree -->
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

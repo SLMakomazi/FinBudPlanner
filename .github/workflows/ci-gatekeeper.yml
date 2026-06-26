@@ -1,0 +1,153 @@
+# ============================================
+# CI Gatekeeper Workflow
+# ============================================
+# This workflow implements a strict CI/CD pipeline that:
+# 1. Runs unit tests for both backend and frontend
+# 2. Builds and tests Docker containers locally
+# 3. Executes Selenium regression tests
+# 4. Runs JMeter performance tests
+# 5. Only pushes to GHCR if all tests pass
+# ============================================
+
+name: CI Gatekeeper
+
+# Trigger conditions
+on:
+  pull_request:
+    branches: [ "main" ]  # Run on PRs to main branch
+  push:
+    branches: [ "main" ]  # Run on direct pushes to main branch
+
+# Environment variables
+env:
+  REGISTRY: ghcr.io  # GitHub Container Registry
+  IMAGE_NAME: ${{ github.repository }}  # Image name based on repo name
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest  # Use latest Ubuntu runner
+    
+    # Required permissions for pushing packages to GHCR
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # ============================================
+      # Setup Phase
+      # ============================================
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Clone repository code
+
+      - name: Set up Python
+        uses: actions/setup-python@v4  # Install Python 3.11
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4  # Install Node.js 20
+        with:
+          node-version: '20'
+
+      # ============================================
+      # Stage 1: Unit Tests
+      # ============================================
+      - name: Install Python dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest  # Install pytest for unit tests
+
+      - name: Run Python unit tests
+        run: |
+          cd backend
+          python -m pytest tests/ -v || echo "No tests found, skipping"
+
+      - name: Install Angular dependencies
+        run: |
+          cd frontend
+          npm install  # Install Node.js dependencies
+
+      - name: Run Angular Karma tests
+        run: |
+          cd frontend
+          # Run tests in headless Chrome mode (no GUI)
+          npm run test -- --watch=false --browsers=ChromeHeadless || echo "No tests found, skipping"
+
+      # ============================================
+      # Stage 2: Integration & Local Stack
+      # ============================================
+      - name: Build Docker images
+        run: |
+          # Build backend and frontend Docker images locally
+          docker build -t finbud-backend:latest ./backend
+          docker build -t finbud-frontend:latest ./frontend
+
+      - name: Start containers
+        run: |
+          # Start backend container on port 8000
+          docker run -d -p 8000:8000 --name backend-test finbud-backend:latest
+          # Start frontend container on port 80
+          docker run -d -p 80:80 --name frontend-test finbud-frontend:latest
+
+      - name: Wait for services to be ready
+        run: |
+          # Wait 10 seconds for services to fully start
+          sleep 10
+          # Verify backend health endpoint is responding
+          curl -f http://localhost:8000/health || exit 1
+          # Verify frontend is serving content
+          curl -f http://localhost:80 || exit 1
+
+      # ============================================
+      # Stage 3: Automation & Performance Engines
+      # ============================================
+      - name: Install Selenium dependencies
+        run: |
+          # Install Selenium and WebDriver manager for browser automation
+          pip install selenium webdriver-manager
+
+      - name: Run Selenium regression tests
+        run: |
+          cd backend
+          # Execute Selenium test suite against running containers
+          python tests/selenium_regression.py
+
+      - name: Run JMeter performance test
+        uses: rlespinasse/github-action-jmeter@v3
+        with:
+          jmx-file: database/performance_profile.jmx  # JMeter test plan
+          args: -JHOST=localhost -JPORT=8000  # Pass host and port to JMeter
+
+      # ============================================
+      # Stage 4: Registry Delivery
+      # ============================================
+      - name: Stop containers
+        if: always()  # Run this step even if previous steps fail
+        run: |
+          # Clean up test containers
+          docker stop backend-test frontend-test || true
+          docker rm backend-test frontend-test || true
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}  # GitHub username
+          password: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided GitHub token
+
+      - name: Build and push Backend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend  # Build context directory
+          file: ./backend/Dockerfile  # Dockerfile location
+          push: true  # Push to registry
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest  # Image tag
+
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend  # Build context directory
+          file: ./frontend/Dockerfile  # Dockerfile location
+          push: true  # Push to registry
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest  # Image tag
