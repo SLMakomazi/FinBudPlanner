@@ -136,7 +136,7 @@ class TestIncomeModel(unittest.TestCase):
 
 ### Frontend Unit Tests
 
-**Location**: `frontend/src/app/**/*.spec.ts`
+**Location**: `frontend/src/app/**/*..ts`
 
 **Framework**: Angular Karma + Jasmine
 
@@ -155,7 +155,7 @@ npm run test -- --watch=false --browsers=ChromeHeadless
 
 **Example Test Structure**:
 ```typescript
-// frontend/src/app/income/income.component.spec.ts
+// frontend/src/app/income/income.component..ts
 describe('IncomeComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -270,7 +270,7 @@ cd backend
 python tests/selenium_regression.py
 ```
 
-**Run Specific Test**:
+**Run ific Test**:
 ```bash
 python -m unittest tests.selenium_regression.SeleniumRegressionTests.test_user_login
 ```
@@ -651,7 +651,7 @@ docker rm backend-test frontend-test
 
 **Issue**: Tests pass locally but fail in CI
 ```bash
-# Solution: Check CI logs for specific error
+# Solution: Check CI logs for ific error
 # Ensure all dependencies are in requirements.txt
 # Verify Dockerfiles use correct paths
 ```
@@ -684,7 +684,7 @@ docker rm backend-test frontend-test
 | Test Type | File | Framework | When It Runs | What It Tests |
 |-----------|------|----------|--------------|---------------|
 | Unit Tests | `backend/tests/*.py` | pytest | Every commit | Individual components |
-| Unit Tests | `frontend/**/*.spec.ts` | Karma/Jasmine | Every commit | Components/services |
+| Unit Tests | `frontend/**/*..ts` | Karma/Jasmine | Every commit | Components/services |
 | Integration | `ci-gatekeeper.yml` | Docker | Every commit | Container startup |
 | Selenium | `backend/tests/selenium_regression.py` | Selenium | Every commit | E2E functionality |
 | JMeter | `database/performance_profile.jmx` | JMeter | Every commit | API performance |

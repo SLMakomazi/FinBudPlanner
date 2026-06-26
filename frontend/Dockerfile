@@ -2,7 +2,7 @@
 # Stage 1: Build Angular Application
 # ============================================
 # Use Node.js 20 as the build environment
-FROM node:20 as build
+FROM node:20 AS build
 
 # Set working directory to /app inside the container
 WORKDIR /app
@@ -11,8 +11,10 @@ WORKDIR /app
 # This leverages Docker layer caching for faster rebuilds
 COPY package*.json ./
 
-# Install Node.js dependencies
-RUN npm install
+# Install Node.js dependencies safely inside CI/CD container environments
+# --no-audit --progress=false: Strips logging overhead to prevent runner RAM exhaustion
+# --legacy-peer-deps: Resolves potential npm conflict lock loops automatically
+RUN npm install --no-audit --progress=false --legacy-peer-deps
 
 # Copy all frontend source code to container
 COPY . .
