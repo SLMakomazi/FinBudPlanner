@@ -48,6 +48,8 @@ jobs:
         test -f backend/tests/test_selenium_regression.py
         test -f frontend/package-lock.json
         test -f frontend/tsconfig.json
+        test -f frontend/tsconfig.app.json  
+        test -f frontend/tsconfig.spec.json
         test -f frontend/src/test.ts
         test -f database/performance_profile.jmx
 
