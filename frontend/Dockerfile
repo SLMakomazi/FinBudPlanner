@@ -31,7 +31,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Angular 17+ sometimes outputs to /browser
 # This handles BOTH cases safely
 
-COPY --from=build /app/dist/fin-bud-planner/browser /usr/share/nginx/html
+COPY --from=build /app/dist/fin-bud-planner/ /usr/share/nginx/html/
 # If your build does NOT use /browser, change to:
 # COPY --from=build /app/dist/fin-bud-planner /usr/share/nginx/html
 
