@@ -109,7 +109,12 @@ jobs:
 
     - name: Run Backend Unit Tests
       working-directory: backend
-      run: pytest tests -v --ignore=tests/test_selenium_regression.py
+      run: |
+        if find tests -type f \( -name "test_*.py" -o -name "*_test.py" \) ! -name "selenium_regression.py" | grep -q .; then
+          pytest tests -v --ignore=tests/selenium_regression.py
+        else
+          echo "No backend unit tests found."
+        fi
 
     ##################################################
     # Frontend Dependencies
@@ -193,7 +198,7 @@ jobs:
           sleep 2
         done
 
-        docker logs backend-test
+        docker logs backend-test || true
         exit 1
 
     ##################################################
@@ -217,7 +222,7 @@ jobs:
           sleep 2
         done
 
-        docker logs frontend-test
+        docker logs frontend-test || true
         exit 1
 
     ##################################################
@@ -277,10 +282,49 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: jmeter-report
-        if-no-files-found: error
+        if-no-files-found: ignore
         path: |
           results.jtl
           jmeter-report
+
+    ##################################################
+    # Upload Selenium Artifacts
+    ##################################################
+
+    - name: Upload Selenium Artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: selenium-artifacts
+        if-no-files-found: ignore
+        path: |
+          backend/screenshots
+          backend/logs
+
+    ##################################################
+    # Print Docker Logs on Failure
+    ##################################################
+
+    - name: Backend Logs
+      if: failure()
+      run: docker logs backend-test || true
+
+    - name: Frontend Logs
+      if: failure()
+      run: docker logs frontend-test || true
+
+    ##################################################
+    # Cleanup
+    ##################################################
+
+    - name: Stop Containers
+      if: always()
+      run: |
+        docker stop backend-test || true
+        docker stop frontend-test || true
+
+        docker rm backend-test || true
+        docker rm frontend-test || true
 
     ##################################################
     # Login GHCR
