@@ -168,7 +168,7 @@ jobs:
       run: |
         docker run -d \
           --name frontend-test \
-          -p 80:80 \
+          -p 4200:80 \
           finbud-frontend:latest
 
         if [ "$(docker inspect -f '{{.State.Running}}' frontend-test)" != "true" ]; then
@@ -212,7 +212,7 @@ jobs:
             exit 1
           fi
 
-          if curl -fs http://localhost; then
+          if curl -fs http://localhost:4200; then
             echo "Frontend ready."
             exit 0
           fi
