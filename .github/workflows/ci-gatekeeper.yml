@@ -126,7 +126,7 @@ jobs:
 
     - name: Run Angular Tests
       working-directory: frontend
-      run: npm run test -- --watch=false --browsers=ChromeHeadlessCI
+      run: npx ng test --configuration=ci
 
     ##################################################
     # Build Docker Images
