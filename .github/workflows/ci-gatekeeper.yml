@@ -12,7 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-test-secret-key' }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
 jobs:
   build-and-push:
@@ -110,11 +110,7 @@ jobs:
     - name: Run Backend Unit Tests
       working-directory: backend
       run: |
-        if find tests -type f \( -name "test_*.py" -o -name "*_test.py" \) ! -name "selenium_regression.py" | grep -q .; then
-          pytest tests -v --ignore=tests/selenium_regression.py
-        else
-          echo "No backend unit tests found."
-        fi
+        PYTHONPATH=. pytest tests -v
 
     ##################################################
     # Frontend Dependencies
