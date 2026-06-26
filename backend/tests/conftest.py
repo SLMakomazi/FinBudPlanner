@@ -17,10 +17,10 @@ def test_user():
 
 
 @pytest.fixture
-def auth_headers(client, test_user):
-    client.post("/api/register", json=test_user)
+def auth_headers(test_client, test_user):
+    test_client.post("/api/register", json=test_user)
 
-    response = client.post(
+    response = test_client.post(
         "/api/token",
         data={
             "username": test_user["username"],
