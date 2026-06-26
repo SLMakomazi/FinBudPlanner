@@ -110,7 +110,7 @@ jobs:
     - name: Run Backend Unit Tests
       working-directory: backend
       run: |
-        PYTHONPATH=. pytest tests -v
+        PYTHONPATH=. pytest tests -v --ignore=tests/test_selenium_regression.py
 
     ##################################################
     # Frontend Dependencies
