@@ -24,7 +24,8 @@ module.exports = function (config) {
         flags: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage'
+          '--disable-dev-shm-usage',
+          '--disable-gpu' // Force disable GPU rendering inside headless runners
         ]
       }
     },
