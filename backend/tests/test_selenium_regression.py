@@ -223,41 +223,37 @@ class SeleniumRegressionTests(unittest.TestCase):
         )
         
         # Click "Set Budget" or "Add Income" button
-        try:
-            add_button = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-primary"))
-            )
-            add_button.click()
-            
-            # Verify form appears
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
-            )
-            
-            # Fill form fields
-            source_field = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.ID, "source"))
-            )
-            source_field.send_keys("Test Income")
-            
-            amount_field = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.ID, "amount"))
-            )
-            amount_field.send_keys("1000")
-            
-            # Submit form
-            submit_button = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-success"))
-            )
-            submit_button.click()
-            
-            # Verify success (form should close)
-            WebDriverWait(self.driver, 10).until_not(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
-            )
-            
-        except TimeoutException:
-            self.skipTest("Form elements not found - skipping form submission test")
+        add_button = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-primary"))
+        )
+        add_button.click()
+        
+        # Verify form appears
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
+        )
+        
+        # Fill form fields
+        source_field = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "source"))
+        )
+        source_field.send_keys("Test Income")
+        
+        amount_field = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "amount"))
+        )
+        amount_field.send_keys("1000")
+        
+        # Submit form
+        submit_button = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-success"))
+        )
+        submit_button.click()
+        
+        # Verify success (form should close)
+        WebDriverWait(self.driver, 10).until_not(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
+        )
 
 
 if __name__ == '__main__':

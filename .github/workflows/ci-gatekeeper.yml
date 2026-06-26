@@ -12,6 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-test-secret-key' }}
 
 jobs:
   build-and-push:
@@ -22,6 +23,10 @@ jobs:
       contents: read
       packages: write
 
+    defaults:
+      run:
+        shell: bash --noprofile --norc -euo pipefail {0}
+
     steps:
 
     ##################################################
@@ -30,6 +35,21 @@ jobs:
 
     - name: Checkout Repository
       uses: actions/checkout@v4
+
+    ##################################################
+    # Required CI Inputs
+    ##################################################
+
+    - name: Validate Required CI Inputs
+      run: |
+        test -n "${SECRET_KEY}"
+        test -f backend/requirements.txt
+        test -f backend/Dockerfile
+        test -f backend/tests/test_selenium_regression.py
+        test -f frontend/package-lock.json
+        test -f frontend/tsconfig.spec.json
+        test -f frontend/src/test.ts
+        test -f database/performance_profile.jmx
 
     ##################################################
     # Python
@@ -58,6 +78,12 @@ jobs:
 
     - name: Setup Chrome
       uses: browser-actions/setup-chrome@v1
+
+    - name: Configure Chrome Binary
+      run: |
+        CHROME_BIN_PATH="$(command -v chrome)"
+        test -x "${CHROME_BIN_PATH}"
+        echo "CHROME_BIN=${CHROME_BIN_PATH}" >> "${GITHUB_ENV}"
 
     ##################################################
     # Docker Buildx
@@ -96,12 +122,7 @@ jobs:
 
     - name: Install Frontend Dependencies
       working-directory: frontend
-      run: |
-        if [ -f package-lock.json ]; then
-          npm ci
-        else
-          npm install
-        fi
+      run: npm ci
 
     ##################################################
     # Angular Tests
@@ -109,8 +130,7 @@ jobs:
 
     - name: Run Angular Tests
       working-directory: frontend
-      run: |
-        npm run test -- --watch=false --browsers=ChromeHeadless || echo "No Angular tests configured."
+      run: npm run test -- --watch=false --browsers=ChromeHeadless
 
     ##################################################
     # Build Docker Images
@@ -136,8 +156,14 @@ jobs:
       run: |
         docker run -d \
           --name backend-test \
+          -e SECRET_KEY="${SECRET_KEY}" \
           -p 8000:8000 \
           finbud-backend:latest
+
+        if [ "$(docker inspect -f '{{.State.Running}}' backend-test)" != "true" ]; then
+          docker logs backend-test
+          exit 1
+        fi
 
     - name: Start Frontend
       run: |
@@ -146,6 +172,11 @@ jobs:
           -p 80:80 \
           finbud-frontend:latest
 
+        if [ "$(docker inspect -f '{{.State.Running}}' frontend-test)" != "true" ]; then
+          docker logs frontend-test
+          exit 1
+        fi
+
     ##################################################
     # Wait for Backend
     ##################################################
@@ -153,10 +184,16 @@ jobs:
     - name: Wait for Backend
       run: |
         for i in {1..30}; do
+          if [ "$(docker inspect -f '{{.State.Running}}' backend-test)" != "true" ]; then
+            docker logs backend-test
+            exit 1
+          fi
+
           if curl -fs http://localhost:8000/health; then
             echo "Backend ready."
             exit 0
           fi
+
           echo "Waiting for backend..."
           sleep 2
         done
@@ -171,10 +208,16 @@ jobs:
     - name: Wait for Frontend
       run: |
         for i in {1..30}; do
+          if [ "$(docker inspect -f '{{.State.Running}}' frontend-test)" != "true" ]; then
+            docker logs frontend-test
+            exit 1
+          fi
+
           if curl -fs http://localhost; then
             echo "Frontend ready."
             exit 0
           fi
+
           echo "Waiting for frontend..."
           sleep 2
         done
@@ -188,12 +231,7 @@ jobs:
 
     - name: Run Selenium Regression Tests
       working-directory: backend
-      run: |
-        if [ -f tests/selenium_regression.py ]; then
-          python tests/selenium_regression.py
-        else
-          echo "No Selenium regression test found."
-        fi
+      run: python tests/test_selenium_regression.py
 
     ##################################################
     # Install Apache JMeter
@@ -219,8 +257,7 @@ jobs:
     ##################################################
 
     - name: Verify JMeter
-      run: |
-        jmeter --version
+      run: jmeter --version
 
     ##################################################
     # Run JMeter
@@ -228,27 +265,20 @@ jobs:
 
     - name: Run JMeter Performance Test
       run: |
-        if [ -f database/performance_profile.jmx ]; then
-
-          jmeter \
-            -n \
-            -t database/performance_profile.jmx \
-            -JHOST=localhost \
-            -JPORT=8000 \
-            -l results.jtl \
-            -e \
-            -o jmeter-report
-
-        else
-          echo "No JMeter test plan found."
-        fi
+        jmeter \
+          -n \
+          -t database/performance_profile.jmx \
+          -JHOST=localhost \
+          -JPORT=8000 \
+          -l results.jtl \
+          -e \
+          -o jmeter-report
 
     ##################################################
     # Upload JMeter Report
     ##################################################
 
     - name: Upload JMeter Report
-      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: jmeter-report
