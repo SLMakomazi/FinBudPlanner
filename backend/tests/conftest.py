@@ -4,8 +4,9 @@ from main import app
 
 client = TestClient(app)
 
+
 @pytest.fixture
-def test_client():
+def client():
     return client
 
 
@@ -18,10 +19,10 @@ def test_user():
 
 
 @pytest.fixture
-def auth_headers(test_client, test_user):
-    test_client.post("/api/register", json=test_user)
+def auth_headers(client, test_user):
+    client.post("/api/register", json=test_user)
 
-    response = test_client.post(
+    response = client.post(
         "/api/token",
         data={
             "username": test_user["username"],
@@ -34,4 +35,3 @@ def auth_headers(test_client, test_user):
     return {
         "Authorization": f"Bearer {token}"
     }
-
