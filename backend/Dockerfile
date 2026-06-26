@@ -36,7 +36,6 @@ RUN mkdir -p /app/database
 # Environment variables
 # ==============================
 ENV PYTHONUNBUFFERED=1
-ENV DATABASE_PATH=/app/database/finbud.db
 
 # ==============================
 # Expose FastAPI port

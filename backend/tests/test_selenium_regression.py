@@ -25,7 +25,7 @@ class LoginPage:
     
     def __init__(self, driver):
         self.driver = driver
-        self.url = "http://localhost:80/login"
+        self.url = "http://localhost:4200/login"
         
     def load(self):
         """Navigate to login page"""
@@ -87,7 +87,7 @@ class DashboardPage:
     
     def __init__(self, driver):
         self.driver = driver
-        self.url = "http://localhost:80/dashboard"
+        self.url = "http://localhost:4200/dashboard"
         
     def load(self):
         """Navigate to dashboard page"""
@@ -215,7 +215,7 @@ class SeleniumRegressionTests(unittest.TestCase):
         self.assertTrue(self.dashboard_page.is_loaded(), "Dashboard failed to load")
         
         # Navigate to income page
-        self.driver.get("http://localhost:80/income")
+        self.driver.get("http://localhost:4200/income")
         
         # Wait for income page to load
         WebDriverWait(self.driver, 10).until(
