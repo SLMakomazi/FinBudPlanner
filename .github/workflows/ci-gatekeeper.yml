@@ -416,7 +416,7 @@ jobs:
         tags: ghcr.io/slmakomazi/finbudplanner-frontend:latest
 
     ##################################################
-    # Compile & Publish Allure Dashboard Website
+    # 📈 Compile & Publish Allure Dashboard Website
     ##################################################
 
     - name: Load Allure Report History
@@ -434,16 +434,16 @@ jobs:
         allure_results: backend/allure-results
         allure_report: allure-report
         allure_history: allure-history
+
+    - name: Post-Allure Workspace Chown Fix
+      if: always()
+      run: sudo chown -R $USER:$USER .
     
     - name: Stage Selenium Report for Web Hosting
       if: always()
       run: |
         mkdir -p allure-history/selenium
         cp backend/tests/reports/*.html allure-history/selenium/index.html || true
-
-    - name: Post-Allure Workspace Chown Fix
-      if: always()
-      run: sudo chown -R $USER:$USER .
 
     - name: Deploy Report Portal to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
