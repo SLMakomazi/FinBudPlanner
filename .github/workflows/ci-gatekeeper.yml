@@ -280,31 +280,68 @@ jobs:
           -o jmeter-report
 
     ##################################################
-    # Upload JMeter Report
+    # 🚀 Report Artifact Collection & Packaging
     ##################################################
 
     - name: Upload JMeter Report
+      id: jmeter_upload
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: jmeter-report
-        if-no-files-found: ignore
-        path: |
-          results.jtl
-          jmeter-report
+        path: jmeter-report/
 
-    ##################################################
-    # Upload Selenium Artifacts
-    ##################################################
-
-    - name: Upload Selenium Artifacts
-      if: failure()
+    - name: Upload Selenium Report
+      id: selenium_upload
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: selenium-artifacts
+        name: selenium-report
+        path: backend/tests/reports/
         if-no-files-found: ignore
-        path: |
-          backend/screenshots
-          backend/logs
+
+    - name: Upload Backend Test Report
+      id: backend_upload
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-test-report
+        path: backend/tests/
+        if-no-files-found: ignore
+
+    - name: Package All Reports
+      id: package_reports
+      if: always()
+      run: |
+        mkdir -p all-reports
+        cp -r jmeter-report all-reports/ || true
+        cp -r backend/tests all-reports/backend-tests || true
+        zip -r all-reports.zip all-reports
+
+    - name: Upload Combined Reports
+      id: combined_upload
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: all-reports
+        path: all-reports.zip
+
+    ##################################################
+    # 📊 Interactive Download Dashboard Summary
+    ##################################################
+
+    - name: Generate Report Download Dashboard
+      if: always()
+      run: |
+        echo "## 📊 Test & Performance Reports Dashboard" >> $GITHUB_STEP_SUMMARY
+        echo "Click the direct download actions below to retrieve the test asset bundles instantly:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Report Asset Target | Quick-Download Button Link |" >> $GITHUB_STEP_SUMMARY
+        echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+        echo "| ⭐ **Combined Master Report Package** | [📥 Download all-reports.zip](${{ steps.combined_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
+        echo "| 📦 **JMeter Performance Data** | [📥 Download jmeter-report ZIP](${{ steps.jmeter_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🤖 **Selenium UI Regression Data** | [📥 Download selenium-report ZIP](${{ steps.selenium_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
+        echo "| ⚙️ **Core Backend Test Output** | [📥 Download backend-test-report ZIP](${{ steps.backend_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
 
     ##################################################
     # Print Docker Logs on Failure
