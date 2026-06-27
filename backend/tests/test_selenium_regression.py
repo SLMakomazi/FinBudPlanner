@@ -213,6 +213,13 @@ class SeleniumRegressionTests(unittest.TestCase):
             EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], .btn-success"))
         ).click()
         
+        try:
+            error_alert = self.driver.find_element(By.CSS_SELECTOR, ".add-form .alert-danger")
+            if error_alert.is_displayed():
+                print(f"\n⚠️ Backend validation failed: {error_alert.text}")
+        except Exception:
+            pass
+            
         # Verify success criteria: structural DOM updates state that the form layout layer closes down
         WebDriverWait(self.driver, 10).until_not(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
