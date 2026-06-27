@@ -158,34 +158,70 @@ class SeleniumRegressionTests(unittest.TestCase):
         
     def test_user_login(self):
         """
-        Test user login functionality
+        Test user login functionality with a dynamic registration fallback
+        for fresh/empty CI database container environments.
         
         Test Steps:
         1. Navigate to login page
-        2. Verify login page loads
-        3. Enter test username
-        4. Enter test password
-        5. Click login button
-        6. Verify redirect to dashboard
-        7. Verify dashboard loads successfully
+        2. Attempt login with 'Siseko'
+        3. If it times out or fails to redirect, navigate to /register
+        4. Register the user 'Siseko'
+        5. Return to login page, authenticate, and verify dashboard redirection
         """
-        # Navigate to login page
+        # Step 1: Navigate to login page
         self.login_page.load()
         self.assertTrue(self.login_page.is_loaded(), "Login page failed to load")
         
-        # Enter credentials
+        # Step 2: Enter credentials
         self.login_page.enter_username("Siseko")
         self.login_page.enter_password("Makomazi@1958")
         
         # Submit login
         self.login_page.click_login()
         
-        # Verify redirect to dashboard
-        WebDriverWait(self.driver, 15).until(
-            EC.url_contains("/dashboard")
-        )
+        try:
+            # Check if login succeeds immediately (user already exists)
+            WebDriverWait(self.driver, 5).until(
+                EC.url_contains("/dashboard")
+            )
+            print("User 'Siseko' already exists. Logged in successfully.")
+        except TimeoutException:
+            # Step 3: Login failed/timed out, meaning user does not exist in the fresh CI DB.
+            # Navigate to the registration page (adjust URL path if needed)
+            print("User 'Siseko' not found in fresh DB. Navigating to registration...")
+            
+            # Assuming your registration route is /register on the same host/port
+            base_url = self.login_page.url.split("/login")[0]
+            self.driver.get(f"{base_url}/register")
+            
+            # Step 4: Complete the registration form
+            # (Ensure your registration inputs match these IDs or selectors)
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.ID, "username"))
+            ).send_keys("Siseko")
+            
+            self.driver.find_element(By.ID, "password").send_keys("Makomazi@1958")
+            
+            # Click register submit button
+            register_btn = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
+            )
+            register_btn.click()
+            
+            # Step 5: Navigate back to login page to authenticate the newly created user
+            self.login_page.load()
+            self.assertTrue(self.login_page.is_loaded(), "Login page failed to reload after registration")
+            
+            self.login_page.enter_username("Siseko")
+            self.login_page.enter_password("Makomazi@1958")
+            self.login_page.click_login()
+            
+            # Final validation of the redirect sequence
+            WebDriverWait(self.driver, 15).until(
+                EC.url_contains("/dashboard")
+            )
         
-        # Verify dashboard is loaded
+        # Verify dashboard is fully loaded and functional
         self.assertTrue(self.dashboard_page.is_loaded(), "Dashboard failed to load after login")
         
     def test_form_submission_workflow(self):
