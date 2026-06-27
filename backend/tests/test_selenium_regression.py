@@ -137,24 +137,29 @@ class SeleniumRegressionTests(unittest.TestCase):
             self.driver.get(f"{BASE_URL}/register")
             try:
                 WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text'], #username"))
+                    EC.presence_of_element_located((By.ID, "username"))
                 )
             except TimeoutException:
                 self.driver.get(f"{BASE_URL}/signup")
             
-            # Fill out flexible registration selectors
+            # Fill out the HTML template input fields precisely by ID
             reg_username = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "input[id*='user'], input[name*='user'], input[type='text']"))
+                EC.presence_of_element_located((By.ID, "username"))
             )
             reg_username.clear()
             reg_username.send_keys(TEST_USER)
             
-            reg_password = self.driver.find_element(By.CSS_SELECTOR, "input[id*='pass'], input[name*='pass'], input[type='password']")
+            reg_password = self.driver.find_element(By.ID, "password")
             reg_password.clear()
             reg_password.send_keys(TEST_PASS)
             
+            # Satisfy Angular client-side registration form logic rules
+            reg_confirm = self.driver.find_element(By.ID, "confirmPassword")
+            reg_confirm.clear()
+            reg_confirm.send_keys(TEST_PASS)
+            
             WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], .btn-primary"))
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
             ).click()
             
             # Complete redirect tracking chain back to login validation
