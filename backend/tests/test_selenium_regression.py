@@ -210,7 +210,7 @@ class SeleniumRegressionTests(unittest.TestCase):
         
         # Submit transaction details cleanly now that all required attributes are valid
         WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], .btn-success"))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".add-form button[type='submit']"))
         ).click()
         
         try:
@@ -219,7 +219,7 @@ class SeleniumRegressionTests(unittest.TestCase):
                 print(f"\n⚠️ Backend validation failed: {error_alert.text}")
         except Exception:
             pass
-            
+
         # Verify success criteria: structural DOM updates state that the form layout layer closes down
         WebDriverWait(self.driver, 10).until_not(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
