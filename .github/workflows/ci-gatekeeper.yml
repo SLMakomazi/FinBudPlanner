@@ -103,7 +103,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest selenium webdriver-manager
+        pip install pytest selenium webdriver-manager allure-pytest
 
     ##################################################
     # Backend Tests
@@ -112,7 +112,7 @@ jobs:
     - name: Run Backend Unit Tests
       working-directory: backend
       run: |
-        PYTHONPATH=. pytest tests -v --ignore=tests/test_selenium_regression.py
+        PYTHONPATH=. pytest tests -v --ignore=tests/test_selenium_regression.py --alluredir=allure-results
 
     ##################################################
     # Frontend Dependencies
@@ -342,6 +342,18 @@ jobs:
         echo "| 📦 **JMeter Performance Data** | [📥 Download jmeter-report ZIP](${{ steps.jmeter_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
         echo "| 🤖 **Selenium UI Regression Data** | [📥 Download selenium-report ZIP](${{ steps.selenium_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
         echo "| ⚙️ **Core Backend Test Output** | [📥 Download backend-test-report ZIP](${{ steps.backend_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
+    
+    ##################################################
+    # 🌐 Publish Interactive HTML Reports to Summary
+    ##################################################
+
+    - name: HTML Preview Deployment
+      if: always()
+      uses: pavi2410/html-preview-action@v5
+      with:
+        html_file: index.html
+        site_root: jmeter-report
+        job_summary: true
 
     ##################################################
     # Print Docker Logs on Failure
@@ -400,3 +412,30 @@ jobs:
         file: frontend/Dockerfile
         push: true
         tags: ghcr.io/slmakomazi/finbudplanner-frontend:latest
+
+    ##################################################
+    # 📈 Compile & Publish Allure Dashboard Website
+    ##################################################
+
+    - name: Load Allure Report History
+      uses: actions/checkout@v4
+      if: always()
+      continue-on-error: true
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Build Allure Test Report GUI Portal
+      uses: simple-elf/allure-report-action@master
+      if: always()
+      with:
+        allure_results: backend/allure-results
+        allure_report: allure-report
+        allure_history: allure-history
+
+    - name: Deploy Report Portal to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      if: always()
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: allure-history
