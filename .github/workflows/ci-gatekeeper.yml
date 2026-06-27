@@ -343,35 +343,23 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     ##################################################
-    # Normalize Image Tags to Lowercase
+    # Build and Push Backend
     ##################################################
-    - name: Lowercase Registry and Image Names for Docker Match
-      run: |
-        echo "REGISTRY=${{ env.REGISTRY }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
-        echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
-
-    ##################################################
-    # Push Backend
-    ##################################################
-
     - name: Build and Push Backend
       uses: docker/build-push-action@v6
       with:
         context: backend
         file: backend/Dockerfile
         push: true
-        tags: |
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+        tags: ghcr.io/${{ github.repository_owner }}/finbudplanner-backend:latest
 
     ##################################################
-    # Push Frontend
+    # Build and Push Frontend
     ##################################################
-
     - name: Build and Push Frontend
       uses: docker/build-push-action@v6
       with:
         context: frontend
         file: frontend/Dockerfile
         push: true
-        tags: |
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+        tags: ghcr.io/${{ github.repository_owner }}/finbudplanner-frontend:latest
