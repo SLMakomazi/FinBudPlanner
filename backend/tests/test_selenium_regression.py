@@ -174,8 +174,8 @@ class SeleniumRegressionTests(unittest.TestCase):
         self.assertTrue(self.login_page.is_loaded(), "Login page failed to load")
         
         # Enter credentials
-        self.login_page.enter_username("testuser")
-        self.login_page.enter_password("testpass123")
+        self.login_page.enter_username("Siseko")
+        self.login_page.enter_password("Makomazi@1958")
         
         # Submit login
         self.login_page.click_login()
@@ -204,8 +204,8 @@ class SeleniumRegressionTests(unittest.TestCase):
         self.login_page.load()
         self.assertTrue(self.login_page.is_loaded(), "Login page failed to load")
         
-        self.login_page.enter_username("testuser")
-        self.login_page.enter_password("testpass123")
+        self.login_page.enter_username("Siseko")
+        self.login_page.enter_password("Makomazi@1958")
         self.login_page.click_login()
         
         # Wait for dashboard
