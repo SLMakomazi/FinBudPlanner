@@ -280,7 +280,7 @@ jobs:
           -o jmeter-report
 
     ##################################################
-    # 🚀 Report Artifact Collection & Packaging
+    #  Report Artifact Collection & Packaging
     ##################################################
 
     - name: Upload JMeter Report
@@ -327,7 +327,7 @@ jobs:
         path: all-reports.zip
 
     ##################################################
-    # 📊 Interactive Download Dashboard Summary
+    # Interactive Download Dashboard Summary
     ##################################################
 
     - name: Generate Report Download Dashboard
@@ -344,7 +344,7 @@ jobs:
         echo "| ⚙️ **Core Backend Test Output** | [📥 Download backend-test-report ZIP](${{ steps.backend_upload.outputs.artifact-url }}) |" >> $GITHUB_STEP_SUMMARY
     
     ##################################################
-    # 🌐 Publish Interactive HTML Reports to Summary
+    # Publish Interactive HTML Reports to Summary
     ##################################################
 
     - name: HTML Preview Deployment
@@ -414,7 +414,7 @@ jobs:
         tags: ghcr.io/slmakomazi/finbudplanner-frontend:latest
 
     ##################################################
-    # 📈 Compile & Publish Allure Dashboard Website
+    # Compile & Publish Allure Dashboard Website
     ##################################################
 
     - name: Load Allure Report History
@@ -432,6 +432,10 @@ jobs:
         allure_results: backend/allure-results
         allure_report: allure-report
         allure_history: allure-history
+
+    - name: Post-Allure Workspace Chown Fix
+      if: always()
+      run: sudo chown -R $USER:$USER .
 
     - name: Deploy Report Portal to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
