@@ -230,9 +230,10 @@ jobs:
     # Selenium Tests
     ##################################################
 
-    - name: Run Selenium Regression Tests
+    - name: Run Selenium Regression Tests via Pytest Allure
       working-directory: backend
-      run: python tests/test_selenium_regression.py
+      run: |
+        PYTHONPATH=. pytest tests/test_selenium_regression.py -v --alluredir=allure-results
 
     - name: Dump Backend Logs on Failure
       if: failure() # 🚨 This triggers automatically ONLY if the step above fails
@@ -438,12 +439,6 @@ jobs:
     - name: Post-Allure Workspace Chown Fix
       if: always()
       run: sudo chown -R $USER:$USER .
-    
-    - name: Stage Selenium Report for Web Hosting
-      if: always()
-      run: |
-        mkdir -p allure-history/selenium
-        cp backend/tests/reports/*.html allure-history/selenium/index.html || true
 
     - name: Deploy Report Portal to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4

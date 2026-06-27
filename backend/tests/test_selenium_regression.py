@@ -244,20 +244,6 @@ class SeleniumRegressionTests(unittest.TestCase):
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
         )
 
+
 if __name__ == '__main__':
-    # 1. Define where the report assets should save inside the workspace
-    report_dir = os.path.join(os.getcwd(), 'tests', 'reports')
-    
-    # 2. Build the test suite from this class
-    suite = unittest.TestLoader().loadTestsFromTestCase(SeleniumRegressionTests)
-    
-    # 3. Initialize the HTML runner with your layout parameters
-    runner = HtmlTestRunner.HTMLTestRunner(
-        output=report_dir,
-        report_title="Selenium UI Regression Test Report",
-        report_name="selenium-ui-report",
-        combine_reports=True
-    )
-    
-    # 4. Run the suite generating the styled HTML assets
-    runner.run(suite)
+    unittest.main()
