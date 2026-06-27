@@ -1,0 +1,9 @@
+INFO:routers.auth:Registration attempt for username: user1
+WARNING:passlib.handlers.bcrypt:(trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+INFO:routers.auth:User 'user1' registered successfully
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 200 OK"
