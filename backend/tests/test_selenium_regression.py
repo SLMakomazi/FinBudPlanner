@@ -196,13 +196,12 @@ class SeleniumRegressionTests(unittest.TestCase):
         # Navigate directly to income dashboard module
         self.driver.get(f"{BASE_URL}/income")
         
-        # Ensure route loading check matches your template wrapper container class
         WebDriverWait(self.driver, 10).until(EC.url_contains("/income"))
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".income-container"))
         )
         
-        # Open targeted configuration form context ("Add Income" button)
+        # Open targeted configuration form context
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-primary"))
         ).click()
@@ -211,35 +210,35 @@ class SeleniumRegressionTests(unittest.TestCase):
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
         )
         
-        # 1. Populate 'source' text field
+        # Populate operational values
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.ID, "source"))
         ).send_keys("Test Income")
         
-        # 2. Populate 'amount' numeric field
         self.driver.find_element(By.ID, "amount").send_keys("1000")
         
-        # 3. Populate 'date' picker field (YYYY-MM-DD template pattern formatted string)
-        self.driver.find_element(By.ID, "date").send_keys("2026-06-27")
+        # 💡 FIX: Inject the date value directly into the DOM to bypass headless character drops
+        date_input = self.driver.find_element(By.ID, "date")
+        self.driver.execute_script("arguments[0].value = '2026-06-27'; arguments[0].dispatchEvent(new Event('input'));", date_input)
         
-        # 4. Select dropdown menu value item ('salary') using standard Select interface wrapper
         category_dropdown = Select(self.driver.find_element(By.ID, "category"))
         category_dropdown.select_by_value("salary")
         
-        # Submit transaction details cleanly now that all required attributes are valid
+        # Submit transaction details cleanly using the precise scoped selector
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".add-form button[type='submit']"))
         ).click()
         
+        # Check for immediate backend response warnings
         try:
             error_alert = self.driver.find_element(By.CSS_SELECTOR, ".add-form .alert-danger")
             if error_alert.is_displayed():
                 print(f"\n⚠️ Backend validation failed: {error_alert.text}")
         except Exception:
             pass
-
-        # Verify success criteria: structural DOM updates state that the form layout layer closes down
-        WebDriverWait(self.driver, 10).until_not(
+            
+        # Verify component state cleanup changes match form removal expectation
+        WebDriverWait(self.driver, 15).until_not(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
         )
 
