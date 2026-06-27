@@ -113,7 +113,7 @@ class SeleniumRegressionTests(unittest.TestCase):
         self.login_page = LoginPage(self.driver)
         self.dashboard_page = DashboardPage(self.driver)
 
-    def _login_workflow(self):
+def _login_workflow(self):
         """Reusable login helper flow that triggers registration fallback if needed"""
         self.login_page.load()
         self.assertTrue(self.login_page.is_loaded(), "Login page failed to load")
@@ -123,10 +123,12 @@ class SeleniumRegressionTests(unittest.TestCase):
         self.login_page.click_login()
         
         try:
+            # Check if login works immediately
             WebDriverWait(self.driver, 5).until(EC.url_contains("/dashboard"))
         except TimeoutException:
-            print(f"User '{TEST_USER}' not found in fresh DB. Falling back to registration...")
+            print(f"User '{TEST_USER}' not found or session expired. Checking registration fallback...")
             
+            # Navigate to signup page safely
             self.driver.get(f"{BASE_URL}/register")
             try:
                 WebDriverWait(self.driver, 5).until(
@@ -135,7 +137,7 @@ class SeleniumRegressionTests(unittest.TestCase):
             except TimeoutException:
                 self.driver.get(f"{BASE_URL}/signup")
             
-            # Form Filling - Sign Up
+            # Fill out the signup form inputs
             reg_username = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.ID, "username"))
             )
@@ -150,15 +152,31 @@ class SeleniumRegressionTests(unittest.TestCase):
             reg_confirm.clear()
             reg_confirm.send_keys(TEST_PASS)
             
+            # Click Submit
             WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".add-form button[type='submit'], button[type='submit']"))
             ).click()
             
-            # Wait for route change to settle
+            # 💡 FIX: Check if an validation alert appears saying the user already exists
+            try:
+                WebDriverWait(self.driver, 3).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, ".alert-danger"))
+                )
+                print("Registration failed/rejected (User likely already exists). Switching to explicit login link detour...")
+                
+                # Click the 'Login here' anchor element from your HTML template layout safely
+                WebDriverWait(self.driver, 5).until(
+                    EC.element_to_be_clickable((By.LINK_TEXT, "Login here"))
+                ).click()
+            except TimeoutException:
+                # No structural block or warning layout discovered; path completed clean
+                pass
+
+            # Track redirection state settlement cleanly
             WebDriverWait(self.driver, 10).until(lambda d: "/dashboard" in d.current_url or "/login" in d.current_url)
             
+            # Force explicit authorization login entry sequence if not automatically redirected to dashboard
             if "/dashboard" not in self.driver.current_url:
-                self.login_page.load()
                 self.login_page.enter_username(TEST_USER)
                 self.login_page.enter_password(TEST_PASS)
                 self.login_page.click_login()
