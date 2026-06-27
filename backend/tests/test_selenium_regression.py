@@ -14,28 +14,27 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
+# ==============================================================================
+# GLOBAL TEST CONFIGURATION
+# ==============================================================================
+BASE_URL = "http://localhost:4200"
+TEST_USER = "Siseko"
+TEST_PASS = "Makomazi@1958"
+
 
 class LoginPage:
     """
     Page Object for Login Page
-    
-    Encapsulates all interactions with the login page following the
-    Page Object Model (POM) design pattern for better maintainability.
+    Encapsulates all interactions with the login page following the POM pattern.
     """
-    
     def __init__(self, driver):
         self.driver = driver
-        self.url = "http://localhost:4200/login"
+        self.url = f"{BASE_URL}/login"
         
     def load(self):
-        """Navigate to login page"""
         self.driver.get(self.url)
         
     def enter_username(self, username):
-        """
-        Enter username in the username field
-        Uses explicit wait to ensure element is present before interaction
-        """
         username_field = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.ID, "username"))
         )
@@ -43,10 +42,6 @@ class LoginPage:
         username_field.send_keys(username)
         
     def enter_password(self, password):
-        """
-        Enter password in the password field
-        Uses explicit wait to ensure element is present before interaction
-        """
         password_field = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.ID, "password"))
         )
@@ -54,20 +49,12 @@ class LoginPage:
         password_field.send_keys(password)
         
     def click_login(self):
-        """
-        Click the login button
-        Uses explicit wait to ensure element is clickable before interaction
-        """
         login_button = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
         )
         login_button.click()
         
     def is_loaded(self):
-        """
-        Check if login page is loaded
-        Returns True if username field is present, False otherwise
-        """
         try:
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.ID, "username"))
@@ -80,24 +67,16 @@ class LoginPage:
 class DashboardPage:
     """
     Page Object for Dashboard Page
-    
-    Encapsulates all interactions with the dashboard page following the
-    Page Object Model (POM) design pattern for better maintainability.
+    Encapsulates all interactions with the dashboard page following the POM pattern.
     """
-    
     def __init__(self, driver):
         self.driver = driver
-        self.url = "http://localhost:4200/dashboard"
+        self.url = f"{BASE_URL}/dashboard"
         
     def load(self):
-        """Navigate to dashboard page"""
         self.driver.get(self.url)
         
     def is_loaded(self):
-        """
-        Check if dashboard page is loaded
-        Returns True if dashboard container is present, False otherwise
-        """
         try:
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".dashboard-container"))
@@ -107,10 +86,6 @@ class DashboardPage:
             return False
             
     def get_username(self):
-        """
-        Get the current username displayed on dashboard
-        Returns the text content of the user info element
-        """
         user_info = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".user-info"))
         )
@@ -120,22 +95,12 @@ class DashboardPage:
 class SeleniumRegressionTests(unittest.TestCase):
     """
     Selenium Regression Test Suite
-    
     Contains functional regression tests for the FinBudPlanner application.
-    All tests use headless Chrome mode for CI/CD compatibility.
     """
     
     @classmethod
     def setUpClass(cls):
-        """
-        Set up Chrome WebDriver with headless configuration
-        Configured for GitHub Actions CI environment:
-        - --headless=new: New headless mode (more stable than old headless)
-        - --no-sandbox: Required for running in containers
-        - --disable-dev-shm-usage: Prevents shared memory issues in containers
-        - --disable-gpu: Disables GPU acceleration (not needed in headless)
-        - --window-size: Sets viewport size for consistent rendering
-        """
+        """Set up Chrome WebDriver with headless configuration for CI/CD environments"""
         chrome_options = Options()
         chrome_options.add_argument('--headless=new')
         chrome_options.add_argument('--no-sandbox')
@@ -144,149 +109,105 @@ class SeleniumRegressionTests(unittest.TestCase):
         chrome_options.add_argument('--window-size=1920,1080')
         
         cls.driver = webdriver.Chrome(options=chrome_options)
-        cls.driver.implicitly_wait(10)  # Set implicit wait for all elements
+        cls.driver.implicitly_wait(10)
         
     @classmethod
     def tearDownClass(cls):
-        """Clean up WebDriver after all tests complete"""
         cls.driver.quit()
         
     def setUp(self):
-        """Set up page objects for each test"""
         self.login_page = LoginPage(self.driver)
         self.dashboard_page = DashboardPage(self.driver)
-        
-    def test_user_login(self):
-        """
-        Test user login functionality with a dynamic registration fallback
-        for fresh/empty CI database container environments.
-        
-        Test Steps:
-        1. Navigate to login page
-        2. Attempt login with 'Siseko'
-        3. If it times out or fails to redirect, navigate to /register
-        4. Register the user 'Siseko'
-        5. Return to login page, authenticate, and verify dashboard redirection
-        """
-        # Step 1: Navigate to login page
+
+    def _login_workflow(self):
+        """Reusable login helper flow that triggers registration fallback if needed"""
         self.login_page.load()
         self.assertTrue(self.login_page.is_loaded(), "Login page failed to load")
         
-        # Step 2: Enter credentials
-        self.login_page.enter_username("Siseko")
-        self.login_page.enter_password("Makomazi@1958")
-        
-        # Submit login
+        self.login_page.enter_username(TEST_USER)
+        self.login_page.enter_password(TEST_PASS)
         self.login_page.click_login()
         
         try:
-            # Check if login succeeds immediately (user already exists)
-            WebDriverWait(self.driver, 5).until(
-                EC.url_contains("/dashboard")
-            )
-            print("User 'Siseko' already exists. Logged in successfully.")
+            WebDriverWait(self.driver, 5).until(EC.url_contains("/dashboard"))
         except TimeoutException:
-            # Step 3: Login failed/timed out, meaning user does not exist in the fresh CI DB.
-            # Navigate to the registration page (adjust URL path if needed)
-            print("User 'Siseko' not found in fresh DB. Navigating to registration...")
+            print(f"User '{TEST_USER}' not found in fresh DB. Falling back to registration...")
             
-            # Assuming your registration route is /register on the same host/port
-            base_url = self.login_page.url.split("/login")[0]
-            self.driver.get(f"{base_url}/register")
+            # Navigate to dynamic signup variants safely
+            self.driver.get(f"{BASE_URL}/register")
+            try:
+                WebDriverWait(self.driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text'], #username"))
+                )
+            except TimeoutException:
+                self.driver.get(f"{BASE_URL}/signup")
             
-            # Step 4: Complete the registration form
-            # (Ensure your registration inputs match these IDs or selectors)
+            # Fill out flexible registration selectors
+            reg_username = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[id*='user'], input[name*='user'], input[type='text']"))
+            )
+            reg_username.clear()
+            reg_username.send_keys(TEST_USER)
+            
+            reg_password = self.driver.find_element(By.CSS_SELECTOR, "input[id*='pass'], input[name*='pass'], input[type='password']")
+            reg_password.clear()
+            reg_password.send_keys(TEST_PASS)
+            
             WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.ID, "username"))
-            ).send_keys("Siseko")
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], .btn-primary"))
+            ).click()
             
-            self.driver.find_element(By.ID, "password").send_keys("Makomazi@1958")
+            # Complete redirect tracking chain back to login validation
+            WebDriverWait(self.driver, 10).until(lambda d: "/dashboard" in d.current_url or "/login" in d.current_url)
             
-            # Click register submit button
-            register_btn = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
-            )
-            register_btn.click()
+            if "/dashboard" not in self.driver.current_url:
+                self.login_page.load()
+                self.login_page.enter_username(TEST_USER)
+                self.login_page.enter_password(TEST_PASS)
+                self.login_page.click_login()
             
-            # Step 5: Navigate back to login page to authenticate the newly created user
-            self.login_page.load()
-            self.assertTrue(self.login_page.is_loaded(), "Login page failed to reload after registration")
-            
-            self.login_page.enter_username("Siseko")
-            self.login_page.enter_password("Makomazi@1958")
-            self.login_page.click_login()
-            
-            # Final validation of the redirect sequence
-            WebDriverWait(self.driver, 15).until(
-                EC.url_contains("/dashboard")
-            )
+            WebDriverWait(self.driver, 15).until(EC.url_contains("/dashboard"))
         
-        # Verify dashboard is fully loaded and functional
+    def test_user_login(self):
+        """Test user login functionality with a dynamic registration fallback"""
+        self._login_workflow()
         self.assertTrue(self.dashboard_page.is_loaded(), "Dashboard failed to load after login")
         
     def test_form_submission_workflow(self):
-        """
-        Test form submission workflow
-        
-        Test Steps:
-        1. Login to application
-        2. Navigate to income page
-        3. Click add button to open form
-        4. Fill form fields
-        5. Submit form
-        6. Verify form closes successfully
-        """
-        # First login
-        self.login_page.load()
-        self.assertTrue(self.login_page.is_loaded(), "Login page failed to load")
-        
-        self.login_page.enter_username("Siseko")
-        self.login_page.enter_password("Makomazi@1958")
-        self.login_page.click_login()
-        
-        # Wait for dashboard
-        WebDriverWait(self.driver, 15).until(
-            EC.url_contains("/dashboard")
-        )
+        """Test form submission workflow on the income view layer"""
+        # Execute login cycle
+        self._login_workflow()
         self.assertTrue(self.dashboard_page.is_loaded(), "Dashboard failed to load")
         
-        # Navigate to income page
-        self.driver.get("http://localhost:4200/income")
+        # Navigate directly to income dashboard module
+        self.driver.get(f"{BASE_URL}/income")
         
-        # Wait for income page to load
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".budget-container"))
         )
         
-        # Click "Set Budget" or "Add Income" button
-        add_button = WebDriverWait(self.driver, 10).until(
+        # Open targeted configuration form context
+        WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-primary"))
-        )
-        add_button.click()
+        ).click()
         
-        # Verify form appears
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
         )
         
-        # Fill form fields
-        source_field = WebDriverWait(self.driver, 10).until(
+        # Populate operational values
+        WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.ID, "source"))
-        )
-        source_field.send_keys("Test Income")
+        ).send_keys("Test Income")
         
-        amount_field = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.ID, "amount"))
-        )
-        amount_field.send_keys("1000")
+        self.driver.find_element(By.ID, "amount").send_keys("1000")
         
-        # Submit form
-        submit_button = WebDriverWait(self.driver, 10).until(
+        # Submit transaction details safely
+        WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-success"))
-        )
-        submit_button.click()
+        ).click()
         
-        # Verify success (form should close)
+        # Verify component state cleanup changes match form removal expectation
         WebDriverWait(self.driver, 10).until_not(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
         )
