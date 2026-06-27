@@ -19,7 +19,7 @@ from selenium.common.exceptions import TimeoutException
 # ==============================================================================
 BASE_URL = "http://localhost:4200"
 TEST_USER = "Siseko"
-TEST_PASS = "Makomazi1958"
+TEST_PASS = "Makomazi@1958"
 
 
 class LoginPage:
