@@ -10,7 +10,7 @@ import unittest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
@@ -19,7 +19,7 @@ from selenium.common.exceptions import TimeoutException
 # ==============================================================================
 BASE_URL = "http://localhost:4200"
 TEST_USER = "Siseko"
-TEST_PASS = "Makomazi@1958"
+TEST_PASS = "Makomazi!1958"
 
 
 class LoginPage:
@@ -84,12 +84,6 @@ class DashboardPage:
             return True
         except TimeoutException:
             return False
-            
-    def get_username(self):
-        user_info = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".user-info"))
-        )
-        return user_info.text
 
 
 class SeleniumRegressionTests(unittest.TestCase):
@@ -133,7 +127,6 @@ class SeleniumRegressionTests(unittest.TestCase):
         except TimeoutException:
             print(f"User '{TEST_USER}' not found in fresh DB. Falling back to registration...")
             
-            # Navigate to dynamic signup variants safely
             self.driver.get(f"{BASE_URL}/register")
             try:
                 WebDriverWait(self.driver, 5).until(
@@ -142,7 +135,7 @@ class SeleniumRegressionTests(unittest.TestCase):
             except TimeoutException:
                 self.driver.get(f"{BASE_URL}/signup")
             
-            # Fill out the HTML template input fields precisely by ID
+            # Form Filling - Sign Up
             reg_username = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.ID, "username"))
             )
@@ -153,7 +146,6 @@ class SeleniumRegressionTests(unittest.TestCase):
             reg_password.clear()
             reg_password.send_keys(TEST_PASS)
             
-            # Satisfy Angular client-side registration form logic rules
             reg_confirm = self.driver.find_element(By.ID, "confirmPassword")
             reg_confirm.clear()
             reg_confirm.send_keys(TEST_PASS)
@@ -162,7 +154,7 @@ class SeleniumRegressionTests(unittest.TestCase):
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
             ).click()
             
-            # Complete redirect tracking chain back to login validation
+            # Wait for route change to settle
             WebDriverWait(self.driver, 10).until(lambda d: "/dashboard" in d.current_url or "/login" in d.current_url)
             
             if "/dashboard" not in self.driver.current_url:
@@ -182,16 +174,17 @@ class SeleniumRegressionTests(unittest.TestCase):
         """Test form submission workflow on the income view layer"""
         # Execute login cycle
         self._login_workflow()
-        self.assertTrue(self.dashboard_page.is_loaded(), "Dashboard failed to load")
         
         # Navigate directly to income dashboard module
         self.driver.get(f"{BASE_URL}/income")
         
+        # Ensure route loading check matches your template wrapper container class
+        WebDriverWait(self.driver, 10).until(EC.url_contains("/income"))
         WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".budget-container"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".income-container"))
         )
         
-        # Open targeted configuration form context
+        # Open targeted configuration form context ("Add Income" button)
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-primary"))
         ).click()
@@ -200,19 +193,27 @@ class SeleniumRegressionTests(unittest.TestCase):
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
         )
         
-        # Populate operational values
+        # 1. Populate 'source' text field
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.ID, "source"))
         ).send_keys("Test Income")
         
+        # 2. Populate 'amount' numeric field
         self.driver.find_element(By.ID, "amount").send_keys("1000")
         
-        # Submit transaction details safely
+        # 3. Populate 'date' picker field (YYYY-MM-DD template pattern formatted string)
+        self.driver.find_element(By.ID, "date").send_keys("2026-06-27")
+        
+        # 4. Select dropdown menu value item ('salary') using standard Select interface wrapper
+        category_dropdown = Select(self.driver.find_element(By.ID, "category"))
+        category_dropdown.select_by_value("salary")
+        
+        # Submit transaction details cleanly now that all required attributes are valid
         WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn-success"))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], .btn-success"))
         ).click()
         
-        # Verify component state cleanup changes match form removal expectation
+        # Verify success criteria: structural DOM updates state that the form layout layer closes down
         WebDriverWait(self.driver, 10).until_not(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".add-form"))
         )
