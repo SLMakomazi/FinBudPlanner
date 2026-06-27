@@ -232,6 +232,12 @@ jobs:
       working-directory: backend
       run: python tests/test_selenium_regression.py
 
+    - name: Dump Backend Logs on Failure
+      if: failure() # 🚨 This triggers automatically ONLY if the step above fails
+      run: |
+        docker logs backend-test
+        docker logs frontend-test
+
     ##################################################
     # Install Apache JMeter
     ##################################################
@@ -335,6 +341,14 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
+    ##################################################
+    # Normalize Image Tags to Lowercase
+    ##################################################
+    - name: Lowercase Registry and Image Names for Docker Match
+      run: |
+        echo "REGISTRY=${{ env.REGISTRY }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
+        echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
 
     ##################################################
     # Push Backend
