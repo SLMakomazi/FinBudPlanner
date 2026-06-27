@@ -113,7 +113,7 @@ class SeleniumRegressionTests(unittest.TestCase):
         self.login_page = LoginPage(self.driver)
         self.dashboard_page = DashboardPage(self.driver)
 
-def _login_workflow(self):
+    def _login_workflow(self):
         """Reusable login helper flow that triggers registration fallback if needed"""
         self.login_page.load()
         self.assertTrue(self.login_page.is_loaded(), "Login page failed to load")
