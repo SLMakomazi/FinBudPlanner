@@ -34,7 +34,7 @@ class TestHealthEndpoint:
 
     @allure.title("Health check response is JSON")
     @allure.description("Verify that health endpoint returns valid JSON content type")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_health_check_content_type(self, test_client):
         response = test_client.get("/health")
         
@@ -43,7 +43,7 @@ class TestHealthEndpoint:
 
     @allure.title("Health check response structure")
     @allure.description("Verify that health endpoint returns correct JSON structure")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_health_check_structure(self, test_client):
         response = test_client.get("/health")
         
@@ -55,7 +55,7 @@ class TestHealthEndpoint:
 
     @allure.title("Health check does not require authentication")
     @allure.description("Verify that health endpoint is accessible without authentication")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_health_check_no_auth_required(self, test_client):
         response = test_client.get("/health")
         

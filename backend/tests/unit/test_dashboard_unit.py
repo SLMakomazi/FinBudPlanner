@@ -30,7 +30,7 @@ class TestDashboardSummary:
 
     @allure.title("Get dashboard summary without authentication")
     @allure.description("Verify that dashboard summary fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_dashboard_summary_unauthorized(self, test_client):
         response = test_client.get("/api/dashboard/summary")
         
@@ -38,7 +38,7 @@ class TestDashboardSummary:
 
     @allure.title("Dashboard summary returns numeric values")
     @allure.description("Verify that dashboard summary returns numeric financial values")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_dashboard_summary_numeric_values(self, test_client, auth_headers):
         response = test_client.get("/api/dashboard/summary", headers=auth_headers)
         
@@ -68,7 +68,7 @@ class TestRecentTransactions:
 
     @allure.title("Get recent transactions without authentication")
     @allure.description("Verify that recent transactions fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_recent_transactions_unauthorized(self, test_client):
         response = test_client.get("/api/dashboard/recent-transactions")
         
@@ -76,7 +76,7 @@ class TestRecentTransactions:
 
     @allure.title("Recent transactions returns empty list for new user")
     @allure.description("Verify that new user gets empty recent transactions list")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_recent_transactions_empty(self, test_client, auth_headers):
         response = test_client.get("/api/dashboard/recent-transactions", headers=auth_headers)
         
@@ -86,7 +86,7 @@ class TestRecentTransactions:
 
     @allure.title("Recent transactions with income and expense")
     @allure.description("Verify that recent transactions includes both income and expenses")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_recent_transactions_with_data(self, test_client, auth_headers):
         # Create income
         test_client.post("/api/income", json={

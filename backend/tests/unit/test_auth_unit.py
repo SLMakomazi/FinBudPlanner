@@ -29,7 +29,7 @@ class TestUserRegistration:
 
     @allure.title("Registration with duplicate username")
     @allure.description("Verify that duplicate username registration fails appropriately")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_register_duplicate_username(self, test_client, test_user):
         # First registration
         test_client.post("/api/register", json=test_user)
@@ -40,7 +40,7 @@ class TestUserRegistration:
 
     @allure.title("Registration with invalid password - too short")
     @allure.description("Verify that registration fails with password shorter than 8 characters")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_register_invalid_password_short(self, test_client):
         response = test_client.post("/api/register", json={
             "username": "user1",
@@ -50,7 +50,7 @@ class TestUserRegistration:
 
     @allure.title("Registration with invalid password - no special character")
     @allure.description("Verify that registration fails with password lacking special characters")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_register_invalid_password_no_special(self, test_client):
         response = test_client.post("/api/register", json={
             "username": "user2",
@@ -60,7 +60,7 @@ class TestUserRegistration:
 
     @allure.title("Registration with missing username")
     @allure.description("Verify that registration fails when username is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_register_missing_username(self, test_client):
         response = test_client.post("/api/register", json={
             "password": "ValidPass123!"
@@ -69,7 +69,7 @@ class TestUserRegistration:
 
     @allure.title("Registration with missing password")
     @allure.description("Verify that registration fails when password is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_register_missing_password(self, test_client):
         response = test_client.post("/api/register", json={
             "username": "user3"
@@ -78,7 +78,7 @@ class TestUserRegistration:
 
     @allure.title("Registration with empty username")
     @allure.description("Verify that registration fails with empty username")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_register_empty_username(self, test_client):
         response = test_client.post("/api/register", json={
             "username": "",
@@ -88,7 +88,7 @@ class TestUserRegistration:
 
     @allure.title("Registration with empty password")
     @allure.description("Verify that registration fails with empty password")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_register_empty_password(self, test_client):
         response = test_client.post("/api/register", json={
             "username": "user4",
@@ -123,7 +123,7 @@ class TestUserLogin:
 
     @allure.title("Login with invalid username")
     @allure.description("Verify that login fails with non-existent username")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_login_invalid_username(self, test_client):
         response = test_client.post("/api/token", data={
             "username": "nonexistent",
@@ -133,7 +133,7 @@ class TestUserLogin:
 
     @allure.title("Login with invalid password")
     @allure.description("Verify that login fails with incorrect password")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_login_invalid_password(self, test_client, test_user):
         # Register user first
         test_client.post("/api/register", json=test_user)
@@ -147,7 +147,7 @@ class TestUserLogin:
 
     @allure.title("Login with missing username")
     @allure.description("Verify that login fails when username is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_login_missing_username(self, test_client):
         response = test_client.post("/api/token", data={
             "password": "ValidPass123!"
@@ -156,7 +156,7 @@ class TestUserLogin:
 
     @allure.title("Login with missing password")
     @allure.description("Verify that login fails when password is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_login_missing_password(self, test_client):
         response = test_client.post("/api/token", data={
             "username": "user1"
@@ -165,7 +165,7 @@ class TestUserLogin:
 
     @allure.title("Login with empty credentials")
     @allure.description("Verify that login fails with empty username and password")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_login_empty_credentials(self, test_client):
         response = test_client.post("/api/token", data={
             "username": "",

@@ -27,7 +27,7 @@ class TestGetCurrentUser:
 
     @allure.title("Get current user without authentication")
     @allure.description("Verify that user profile retrieval fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_get_me_unauthorized(self, test_client):
         response = test_client.get("/api/users/me")
         
@@ -35,7 +35,7 @@ class TestGetCurrentUser:
 
     @allure.title("Get current user returns correct username")
     @allure.description("Verify that returned username matches authenticated user")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_get_me_correct_username(self, test_client, test_user, auth_headers):
         response = test_client.get("/api/users/me", headers=auth_headers)
         
@@ -52,7 +52,7 @@ class TestUserProfileValidation:
 
     @allure.title("User profile contains required fields")
     @allure.description("Verify that user profile contains all required fields")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_user_profile_required_fields(self, test_client, auth_headers):
         response = test_client.get("/api/users/me", headers=auth_headers)
         
@@ -65,7 +65,7 @@ class TestUserProfileValidation:
 
     @allure.title("User profile username is not empty")
     @allure.description("Verify that username field is not empty")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_user_profile_username_not_empty(self, test_client, auth_headers):
         response = test_client.get("/api/users/me", headers=auth_headers)
         

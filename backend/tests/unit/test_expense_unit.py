@@ -32,7 +32,7 @@ class TestCreateExpense:
 
     @allure.title("Expense creation with missing description")
     @allure.description("Verify that expense creation fails when description is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_expense_missing_description(self, test_client, auth_headers):
         response = test_client.post("/api/expense", json={
             "amount": 200,
@@ -44,7 +44,7 @@ class TestCreateExpense:
 
     @allure.title("Expense creation with missing amount")
     @allure.description("Verify that expense creation fails when amount is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_expense_missing_amount(self, test_client, auth_headers):
         response = test_client.post("/api/expense", json={
             "description": "Food",
@@ -56,7 +56,7 @@ class TestCreateExpense:
 
     @allure.title("Expense creation with negative amount")
     @allure.description("Verify that expense creation fails with negative amount")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_expense_negative_amount(self, test_client, auth_headers):
         response = test_client.post("/api/expense", json={
             "description": "Food",
@@ -69,7 +69,7 @@ class TestCreateExpense:
 
     @allure.title("Expense creation with zero amount")
     @allure.description("Verify that expense creation fails with zero amount")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_expense_zero_amount(self, test_client, auth_headers):
         response = test_client.post("/api/expense", json={
             "description": "Food",
@@ -82,7 +82,7 @@ class TestCreateExpense:
 
     @allure.title("Expense creation with invalid date format")
     @allure.description("Verify that expense creation fails with invalid date format")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_expense_invalid_date(self, test_client, auth_headers):
         response = test_client.post("/api/expense", json={
             "description": "Food",
@@ -95,7 +95,7 @@ class TestCreateExpense:
 
     @allure.title("Expense creation without authentication")
     @allure.description("Verify that expense creation fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_expense_unauthorized(self, test_client):
         response = test_client.post("/api/expense", json={
             "description": "Food",
@@ -134,7 +134,7 @@ class TestGetExpenses:
 
     @allure.title("Get expenses without authentication")
     @allure.description("Verify that expense retrieval fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_get_expenses_unauthorized(self, test_client):
         response = test_client.get("/api/expense")
         
@@ -142,7 +142,7 @@ class TestGetExpenses:
 
     @allure.title("Get expenses returns empty list for new user")
     @allure.description("Verify that new user gets empty expense list")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_get_expenses_empty(self, test_client, auth_headers):
         response = test_client.get("/api/expense", headers=auth_headers)
         
@@ -186,7 +186,7 @@ class TestUpdateExpense:
 
     @allure.title("Update expense with invalid ID")
     @allure.description("Verify that expense update fails with non-existent ID")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_update_expense_invalid_id(self, test_client, auth_headers):
         response = test_client.put("/api/expense/99999", json={
             "description": "Groceries",
@@ -199,7 +199,7 @@ class TestUpdateExpense:
 
     @allure.title("Update expense without authentication")
     @allure.description("Verify that expense update fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_update_expense_unauthorized(self, test_client):
         response = test_client.put("/api/expense/1", json={
             "description": "Groceries",
@@ -239,7 +239,7 @@ class TestDeleteExpense:
 
     @allure.title("Delete expense with invalid ID")
     @allure.description("Verify that expense deletion fails with non-existent ID")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_delete_expense_invalid_id(self, test_client, auth_headers):
         response = test_client.delete("/api/expense/99999", headers=auth_headers)
         
@@ -247,7 +247,7 @@ class TestDeleteExpense:
 
     @allure.title("Delete expense without authentication")
     @allure.description("Verify that expense deletion fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_delete_expense_unauthorized(self, test_client):
         response = test_client.delete("/api/expense/1")
         

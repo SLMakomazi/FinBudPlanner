@@ -32,7 +32,7 @@ class TestCreateIncome:
 
     @allure.title("Income creation with missing source")
     @allure.description("Verify that income creation fails when source is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_income_missing_source(self, test_client, auth_headers):
         response = test_client.post("/api/income", json={
             "amount": 5000,
@@ -44,7 +44,7 @@ class TestCreateIncome:
 
     @allure.title("Income creation with missing amount")
     @allure.description("Verify that income creation fails when amount is missing")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_income_missing_amount(self, test_client, auth_headers):
         response = test_client.post("/api/income", json={
             "source": "Salary",
@@ -56,7 +56,7 @@ class TestCreateIncome:
 
     @allure.title("Income creation with negative amount")
     @allure.description("Verify that income creation fails with negative amount")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_income_negative_amount(self, test_client, auth_headers):
         response = test_client.post("/api/income", json={
             "source": "Salary",
@@ -69,7 +69,7 @@ class TestCreateIncome:
 
     @allure.title("Income creation with zero amount")
     @allure.description("Verify that income creation fails with zero amount")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_income_zero_amount(self, test_client, auth_headers):
         response = test_client.post("/api/income", json={
             "source": "Salary",
@@ -82,7 +82,7 @@ class TestCreateIncome:
 
     @allure.title("Income creation with invalid date format")
     @allure.description("Verify that income creation fails with invalid date format")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_income_invalid_date(self, test_client, auth_headers):
         response = test_client.post("/api/income", json={
             "source": "Salary",
@@ -95,7 +95,7 @@ class TestCreateIncome:
 
     @allure.title("Income creation without authentication")
     @allure.description("Verify that income creation fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_create_income_unauthorized(self, test_client):
         response = test_client.post("/api/income", json={
             "source": "Salary",
@@ -134,7 +134,7 @@ class TestGetIncome:
 
     @allure.title("Get income without authentication")
     @allure.description("Verify that income retrieval fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_get_income_unauthorized(self, test_client):
         response = test_client.get("/api/income")
         
@@ -142,7 +142,7 @@ class TestGetIncome:
 
     @allure.title("Get income returns empty list for new user")
     @allure.description("Verify that new user gets empty income list")
-    @allure.severity(allure.severity_level.MEDIUM)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_get_income_empty(self, test_client, auth_headers):
         response = test_client.get("/api/income", headers=auth_headers)
         
@@ -186,7 +186,7 @@ class TestUpdateIncome:
 
     @allure.title("Update income with invalid ID")
     @allure.description("Verify that income update fails with non-existent ID")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_update_income_invalid_id(self, test_client, auth_headers):
         response = test_client.put("/api/income/99999", json={
             "source": "Bonus",
@@ -199,7 +199,7 @@ class TestUpdateIncome:
 
     @allure.title("Update income without authentication")
     @allure.description("Verify that income update fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_update_income_unauthorized(self, test_client):
         response = test_client.put("/api/income/1", json={
             "source": "Bonus",
@@ -239,7 +239,7 @@ class TestDeleteIncome:
 
     @allure.title("Delete income with invalid ID")
     @allure.description("Verify that income deletion fails with non-existent ID")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_delete_income_invalid_id(self, test_client, auth_headers):
         response = test_client.delete("/api/income/99999", headers=auth_headers)
         
@@ -247,7 +247,7 @@ class TestDeleteIncome:
 
     @allure.title("Delete income without authentication")
     @allure.description("Verify that income deletion fails without authentication")
-    @allure.severity(allure.severity_level.HIGH)
+    @allure.severity(allure.severity_level.CRITICAL)
     def test_delete_income_unauthorized(self, test_client):
         response = test_client.delete("/api/income/1")
         
