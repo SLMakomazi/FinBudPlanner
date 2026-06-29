@@ -153,6 +153,8 @@ jobs:
 
       - name: Run Selenium Regression Tests via Pytest Allure
         working-directory: backend
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           PYTHONPATH=. pytest tests/selenium -v --alluredir=allure-results
 
