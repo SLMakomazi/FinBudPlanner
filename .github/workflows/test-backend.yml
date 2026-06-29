@@ -21,6 +21,8 @@ jobs:
 
       - name: Install Backend Core Dependencies
         working-directory: backend
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
