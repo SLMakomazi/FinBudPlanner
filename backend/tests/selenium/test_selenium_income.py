@@ -4,6 +4,7 @@ Tests income management functionality with Page Object Model and Allure reportin
 """
 import pytest
 import allure
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -14,7 +15,10 @@ from selenium.common.exceptions import TimeoutException
 
 
 BASE_URL = "http://localhost:4200"
-TEST_USER = "Siseko"
+
+# Generate unique credentials so this test suite never collides with others
+UNIQUE_SUFFIX = int(time.time())
+TEST_USER = f"Siseko_Income_{UNIQUE_SUFFIX}"
 TEST_PASS = "Makomazi!1958"
 
 
@@ -77,16 +81,24 @@ class TestIncomeWorkflow:
             
             if signup_page.is_error_message_displayed():
                 allure.attach(signup_page.get_error_message(), name="Registration Error",
-                             attachment_type=allure.attachment_type.TEXT)
+                              attachment_type=allure.attachment_type.TEXT)
                 login_page.load()
                 login_page.login(TEST_USER, TEST_PASS)
             
-            login_page.helper.wait_for_url_contains("/dashboard", timeout=10)
+            try:
+                login_page.helper.wait_for_url_contains("/dashboard", timeout=10)
+            except TimeoutException as e:
+                login_page.helper.capture_failure_artifacts("fallback_login_dashboard_timeout")
+                raise e
             
             if "/dashboard" not in login_page.get_current_url():
                 login_page.load()
                 login_page.login(TEST_USER, TEST_PASS)
-                login_page.helper.wait_for_url_contains("/dashboard", timeout=15)
+                try:
+                    login_page.helper.wait_for_url_contains("/dashboard", timeout=15)
+                except TimeoutException as e:
+                    login_page.helper.capture_failure_artifacts("retry_login_dashboard_timeout")
+                    raise e
 
     @allure.title("Selenium - Income form submission workflow")
     @allure.description("Test complete income creation workflow including login, navigation, and form submission")
@@ -119,7 +131,7 @@ class TestIncomeWorkflow:
             if login_page.helper.is_element_visible(error_alert):
                 error_text = login_page.helper.get_element_text(error_alert)
                 allure.attach(error_text, name="Backend Validation Error",
-                             attachment_type=allure.attachment_type.TEXT)
+                              attachment_type=allure.attachment_type.TEXT)
                 pytest.fail(f"Backend validation failed: {error_text}")
             
         except Exception as e:
