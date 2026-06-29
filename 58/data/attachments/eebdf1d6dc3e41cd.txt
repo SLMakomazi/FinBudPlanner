@@ -1,0 +1,1 @@
+INFO:httpx:HTTP Request: DELETE http://testserver/api/income/1 "HTTP/1.1 401 Unauthorized"

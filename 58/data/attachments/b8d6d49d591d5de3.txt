@@ -1,0 +1,3 @@
+INFO:routers.auth:Registration attempt for username: newuser
+INFO:routers.auth:User 'newuser' registered successfully
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 200 OK"

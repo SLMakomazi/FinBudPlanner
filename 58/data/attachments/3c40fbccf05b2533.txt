@@ -1,0 +1,6 @@
+INFO     routers.auth:auth.py:123 Registration attempt for username: testuser
+INFO     routers.auth:auth.py:148 User 'testuser' registered successfully
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/register "HTTP/1.1 200 OK"
+INFO     routers.auth:auth.py:123 Registration attempt for username: testuser
+WARNING  routers.auth:auth.py:132 Registration failed: Username 'testuser' already exists
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"

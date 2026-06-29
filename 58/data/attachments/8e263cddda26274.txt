@@ -1,0 +1,7 @@
+INFO     routers.auth:auth.py:123 Registration attempt for username: testuser
+WARNING  routers.auth:auth.py:132 Registration failed: Username 'testuser' already exists
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"
+INFO     routers.auth:auth.py:166 Login attempt for username: testuser
+INFO     routers.auth:auth.py:189 User 'testuser' logged in successfully
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/token "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1013 HTTP Request: PUT http://testserver/api/income/99999 "HTTP/1.1 405 Method Not Allowed"
