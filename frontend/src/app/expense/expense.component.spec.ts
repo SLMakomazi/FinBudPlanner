@@ -35,10 +35,10 @@ describe('ExpenseComponent', () => {
   });
 
   it('should have newExpense object with required properties', () => {
-    expect(component.newExpense).toHaveProperty('description');
-    expect(component.newExpense).toHaveProperty('amount');
-    expect(component.newExpense).toHaveProperty('date');
-    expect(component.newExpense).toHaveProperty('category');
+    expect(component.newExpense.description).toBeDefined();
+    expect(component.newExpense.amount).toBeDefined();
+    expect(component.newExpense.date).toBeDefined();
+    expect(component.newExpense.category).toBeDefined();
   });
 
   it('should set default date on initialization', () => {
