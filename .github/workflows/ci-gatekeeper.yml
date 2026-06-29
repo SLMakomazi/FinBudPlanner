@@ -359,7 +359,7 @@ jobs:
     ##################################################
 
     - name: HTML Preview Deployment
-      if: always()
+      if: always() && hashFiles('jmeter-report/index.html') != ''
       uses: pavi2410/html-preview-action@v5
       with:
         html_file: index.html
