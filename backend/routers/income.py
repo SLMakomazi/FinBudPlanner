@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from models import Income, User
-from schemas import IncomeCreate, IncomeUpdate, Income as IncomeSchema, IncomeUpdate
+from schemas import IncomeCreate, Income as IncomeSchema, IncomeUpdate
 from auth import get_current_active_user
 import logging
 

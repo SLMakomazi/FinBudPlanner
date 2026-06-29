@@ -11,7 +11,7 @@ from typing import List
 from datetime import datetime 
 from database import get_db
 from models import Budget, User, Expense
-from schemas import BudgetCreate, BudgetUpdate, Budget as BudgetSchema, BudgetUpdate
+from schemas import BudgetCreate, Budget as BudgetSchema, BudgetUpdate
 from auth import get_current_active_user
 
 import logging
