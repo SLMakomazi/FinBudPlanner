@@ -50,27 +50,27 @@ def validate_password(password: str) -> bool:
     """
     if len(password) < 8:
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Password must be at least 8 characters long"
         )
     if not re.search(r"[A-Z]", password):
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Password must contain at least one uppercase letter"
         )
     if not re.search(r"[a-z]", password):
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Password must contain at least one lowercase letter"
         )
     if not re.search(r"\d", password):
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Password must contain at least one digit"
         )
     if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Password must contain at least one special character"
         )
     return True
@@ -95,12 +95,12 @@ def validate_username(username: str) -> bool:
     """
     if len(username) < 3:
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Username must be at least 3 characters long"
         )
     if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", username):
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Username must start with a letter and contain only letters, numbers, and underscores"
         )
     return True
@@ -131,7 +131,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     if db_user:
         logger.warning(f"Registration failed: Username '{user.username}' already exists")
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Username already registered"
         )
     
@@ -170,7 +170,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not user:
         logger.warning(f"Login failed: User '{form_data.username}' not found")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found. Please sign up first."
         )
     if not verify_password(form_data.password, user.hashed_password):
