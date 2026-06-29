@@ -47,7 +47,9 @@ jobs:
         test -n "${SECRET_KEY}"
         test -f backend/requirements.txt
         test -f backend/Dockerfile
-        test -f backend/tests/test_selenium_regression.py
+        test -f backend/pytest.ini
+        test -f backend/tests/selenium/test_selenium_login.py
+        test -f backend/tests/selenium/test_selenium_income.py
         test -f frontend/package-lock.json
         test -f frontend/tsconfig.json
         test -f frontend/tsconfig.app.json  
@@ -105,7 +107,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest selenium webdriver-manager allure-pytest
+        pip install pytest selenium webdriver-manager allure-pytest pytest-cov
 
     ##################################################
     # Backend Tests
@@ -114,7 +116,12 @@ jobs:
     - name: Run Backend Unit Tests
       working-directory: backend
       run: |
-        PYTHONPATH=. pytest tests -v --ignore=tests/test_selenium_regression.py --alluredir=allure-results
+        PYTHONPATH=. pytest tests/unit -v --alluredir=allure-results --cov=. --cov-report=html --cov-report=term-missing
+
+    - name: Run Backend Integration Tests
+      working-directory: backend
+      run: |
+        PYTHONPATH=. pytest tests/integration -v --alluredir=allure-results --cov=. --cov-report=html --cov-report=term-missing
 
     ##################################################
     # Frontend Dependencies
@@ -233,7 +240,7 @@ jobs:
     - name: Run Selenium Regression Tests via Pytest Allure
       working-directory: backend
       run: |
-        PYTHONPATH=. pytest tests/test_selenium_regression.py -v --alluredir=allure-results
+        PYTHONPATH=. pytest tests/selenium -v --alluredir=allure-results
 
     - name: Dump Backend Logs on Failure
       if: failure() # 🚨 This triggers automatically ONLY if the step above fails
@@ -300,7 +307,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: selenium-report
-        path: backend/tests/reports/
+        path: backend/allure-results/
         if-no-files-found: ignore
 
     - name: Upload Backend Test Report
@@ -309,7 +316,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: backend-test-report
-        path: backend/tests/
+        path: backend/coverage/
         if-no-files-found: ignore
 
     - name: Package All Reports
@@ -318,7 +325,8 @@ jobs:
       run: |
         mkdir -p all-reports
         cp -r jmeter-report all-reports/ || true
-        cp -r backend/tests all-reports/backend-tests || true
+        cp -r backend/coverage all-reports/backend-coverage || true
+        cp -r backend/allure-results all-reports/backend-allure-results || true
         zip -r all-reports.zip all-reports
 
     - name: Upload Combined Reports
