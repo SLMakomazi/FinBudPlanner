@@ -9,6 +9,11 @@ on:
 jobs:
   run-backend-tests:
     runs-on: ubuntu-latest
+    
+    # 🌟 Defining env here makes it available to ALL steps below automatically!
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -21,8 +26,6 @@ jobs:
 
       - name: Install Backend Core Dependencies
         working-directory: backend
-        env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -35,8 +38,6 @@ jobs:
 
       - name: Run Backend Integration Tests
         working-directory: backend
-        env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           PYTHONPATH=. pytest tests/integration -v --alluredir=allure-results --cov=. --cov-report=html --cov-report=term-missing
 
