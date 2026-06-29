@@ -5,7 +5,7 @@ Provides common functionality for all page objects
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from .helpers.selenium_helpers import SeleniumHelper
+from tests.selenium.pages.helpers.selenium_helpers import SeleniumHelper
 import allure
 
 
