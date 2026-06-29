@@ -1,0 +1,2 @@
+SEVERE: http://localhost:8000/api/token - Failed to load resource: the server responded with a status of 401 (Unauthorized)
+SEVERE: http://localhost:4200/main.fb8fb85804f73e36.js 0:270704 "[LoginComponent] Login failed" Vs
