@@ -1,0 +1,13 @@
+SEVERE: http://localhost:8000/api/token - Failed to load resource: the server responded with a status of 401 (Unauthorized)
+SEVERE: http://localhost:4200/main.fb8fb85804f73e36.js 0:270704 "[LoginComponent] Login failed" Vs
+SEVERE: http://localhost:4200/main.fb8fb85804f73e36.js 0:37454 "ERROR" I: NG04002: 'register'
+    at $5.noMatchError (http://localhost:4200/main.fb8fb85804f73e36.js:1:180909)
+    at http://localhost:4200/main.fb8fb85804f73e36.js:1:181659
+    at http://localhost:4200/main.fb8fb85804f73e36.js:1:143744
+    at rO._error (http://localhost:4200/main.fb8fb85804f73e36.js:1:9866)
+    at rO.error (http://localhost:4200/main.fb8fb85804f73e36.js:1:4492)
+    at rO._error (http://localhost:4200/main.fb8fb85804f73e36.js:1:4732)
+    at rO.error (http://localhost:4200/main.fb8fb85804f73e36.js:1:4492)
+    at rO._error (http://localhost:4200/main.fb8fb85804f73e36.js:1:4732)
+    at rO.error (http://localhost:4200/main.fb8fb85804f73e36.js:1:4492)
+    at rO._error (http://localhost:4200/main.fb8fb85804f73e36.js:1:4732)

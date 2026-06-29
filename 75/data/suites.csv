@@ -1,0 +1,3 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Test complete income creation workflow including login, navigation, and form submission","37515","Selenium - Income form submission workflow","Frontend UI","2026-06-29","broken","2026-06-29","TestIncomeWorkflow","Selenium UI","",""
+"Test user login functionality with automatic registration fallback if user doesn't exist","1035","Selenium - User login with registration fallback","Frontend UI","2026-06-29","passed","2026-06-29","TestUserLogin","Selenium UI","",""

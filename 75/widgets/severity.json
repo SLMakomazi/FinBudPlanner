@@ -1,0 +1,1 @@
+[{"uid":"47cec8a80e27579b","name":"Selenium - User login with registration fallback","time":{"start":1782729470450,"stop":1782729471485,"duration":1035},"status":"passed","severity":"critical"},{"uid":"729beccf27a1c771","name":"Selenium - Income form submission workflow","time":{"start":1782729432519,"stop":1782729470034,"duration":37515},"status":"broken","severity":"critical"}]
