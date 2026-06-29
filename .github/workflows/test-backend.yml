@@ -1,0 +1,47 @@
+name: Test Backend Sub-Suite
+
+on:
+  workflow_call:
+    secrets:
+      SECRET_KEY:
+        required: true
+
+jobs:
+  run-backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Backend Core Dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest selenium webdriver-manager allure-pytest pytest-cov
+
+      - name: Run Backend Unit Tests
+        working-directory: backend
+        run: |
+          PYTHONPATH=. pytest tests/unit -v --alluredir=allure-results --cov=. --cov-report=html --cov-report=term-missing
+
+      - name: Run Backend Integration Tests
+        working-directory: backend
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: |
+          PYTHONPATH=. pytest tests/integration -v --alluredir=allure-results --cov=. --cov-report=html --cov-report=term-missing
+
+      - name: Upload Backend Test Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-report
+          path: backend/htmlcov/
+          if-no-files-found: ignore

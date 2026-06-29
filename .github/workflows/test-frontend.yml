@@ -1,0 +1,26 @@
+name: Test Frontend Sub-Suite
+
+on:
+  workflow_call:
+
+jobs:
+  run-frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Node Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run Angular CI Headless Tests
+        working-directory: frontend
+        run: npx ng test --configuration=ci
