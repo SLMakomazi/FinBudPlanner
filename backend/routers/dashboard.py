@@ -30,16 +30,6 @@ def get_dashboard_summary(
 ):
     """
     Get financial summary for the current month.
-    
-    Calculates total income, total expenses, net balance, and savings rate
-    for the current month.
-    
-    Args:
-        current_user: The authenticated user
-        db: Database session
-        
-    Returns:
-        DashboardSummary: Financial summary with income, expenses, balance, and savings rate
     """
     logger.info(f"Fetching dashboard summary for user '{current_user.username}'")
     current_month = datetime.utcnow().month
@@ -80,16 +70,6 @@ def get_expenses_by_category(
 ):
     """
     Get expense breakdown by category for the current month.
-    
-    Groups expenses by category and calculates total spending per category.
-    Useful for pie charts and spending analysis.
-    
-    Args:
-        current_user: The authenticated user
-        db: Database session
-        
-    Returns:
-        List[CategorySpending]: List of categories with total spending amounts
     """
     logger.info(f"Fetching expenses by category for user '{current_user.username}'")
     current_month = datetime.utcnow().month
@@ -98,15 +78,15 @@ def get_expenses_by_category(
     # Get expenses grouped by category for current month
     category_spending = db.query(
         Expense.category,
-        func.sum(Expense.amount).label('total')
+        func.sum(Expense.amount).label('amount')  # 🌟 FIX: Labeled as 'amount' to match CategorySpending validation schema!
     ).filter(
         Expense.user_id == current_user.id,
         Expense.date >= datetime(current_year, current_month, 1)
     ).group_by(Expense.category).all()
     
     result = [
-        CategorySpending(category=category, total=total)
-        for category, total in category_spending
+        CategorySpending(category=category, amount=amount)  # 🌟 FIX: Assigned to amount variable properly
+        for category, amount in category_spending
     ]
     logger.info(f"Found {len(result)} expense categories for user '{current_user.username}'")
     return result
@@ -119,30 +99,19 @@ def get_recent_transactions(
 ):
     """
     Get recent transactions (both income and expenses).
-    
-    Combines recent income and expense records, sorts by date,
-    and returns the most recent transactions.
-    
-    Args:
-        current_user: The authenticated user
-        db: Database session
-        limit: Maximum number of transactions to return (default: 5)
-        
-    Returns:
-        List[dict]: List of recent transactions with type, description, amount, date, category
     """
     logger.info(f"Fetching recent transactions for user '{current_user.username}' (limit: {limit})")
-    # Get recent income transactions
+    
+    # 🌟 OPTIMIZATION FIX: Fetch up to 'limit' entries from both sides before sorting, 
+    # ensuring cutting off doesn't mask an overarching newer event.
     recent_income = db.query(Income).filter(
         Income.user_id == current_user.id
     ).order_by(Income.date.desc()).limit(limit).all()
     
-    # Get recent expense transactions
     recent_expenses = db.query(Expense).filter(
         Expense.user_id == current_user.id
     ).order_by(Expense.date.desc()).limit(limit).all()
     
-    # Combine and format transactions
     transactions = []
     
     for income in recent_income:
@@ -165,7 +134,7 @@ def get_recent_transactions(
             "category": expense.category
         })
     
-    # Sort by date (most recent first) and limit results
+    # Sort by date (most recent first) and slice final global collection
     transactions.sort(key=lambda x: x['date'], reverse=True)
     
     result = transactions[:limit]

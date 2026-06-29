@@ -10,9 +10,10 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from models import Income, User
-from schemas import IncomeCreate, Income as IncomeSchema
+from schemas import IncomeCreate, IncomeUpdate, Income as IncomeSchema
 from auth import get_current_active_user
 import logging
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -135,3 +136,35 @@ def delete_income(
     db.commit()
     logger.info(f"Income record {income_id} deleted successfully")
     return {"message": "Income deleted successfully"}
+
+# =========================
+# UPDATE INCOME
+# =========================
+@router.put("/income/{income_id}", response_model=IncomeSchema)
+def update_income(
+    income_id: int,
+    income_update: IncomeUpdate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Update a specific income record."""
+    logger.info(f"Updating income record {income_id} for user '{current_user.username}'")
+    
+    db_income = db.query(Income).filter(
+        Income.id == income_id,
+        Income.user_id == current_user.id
+    ).first()
+    
+    if not db_income:
+        logger.warning(f"Income record {income_id} not found for user '{current_user.username}'")
+        raise HTTPException(status_code=404, detail="Income not found")
+        
+    update_data = income_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_income, key, value)
+        
+    db.commit()
+    db.refresh(db_income)
+    
+    logger.info(f"Income record {income_id} updated successfully")
+    return db_income

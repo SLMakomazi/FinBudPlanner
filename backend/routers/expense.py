@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from models import Expense, User
-from schemas import ExpenseCreate, Expense as ExpenseSchema
+from schemas import ExpenseCreate, Expense, ExpenseUpdate as ExpenseSchema
 from auth import get_current_active_user
 import logging
 
@@ -135,3 +135,35 @@ def delete_expense(
     db.commit()
     logger.info(f"Expense record {expense_id} deleted successfully")
     return {"message": "Expense deleted successfully"}
+
+# =========================
+# UPDATE EXPENSE
+# =========================
+@router.put("/expense/{expense_id}", response_model=ExpenseSchema)
+def update_expense(
+    expense_id: int,
+    expense_update: ExpenseUpdate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Update a specific expense record."""
+    logger.info(f"Updating expense record {expense_id} for user '{current_user.username}'")
+    
+    db_expense = db.query(Expense).filter(
+        Expense.id == expense_id,
+        Expense.user_id == current_user.id
+    ).first()
+    
+    if not db_expense:
+        logger.warning(f"Expense record {expense_id} not found for user '{current_user.username}'")
+        raise HTTPException(status_code=404, detail="Expense not found")
+        
+    update_data = expense_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_expense, key, value)
+        
+    db.commit()
+    db.refresh(db_expense)
+    
+    logger.info(f"Expense record {expense_id} updated successfully")
+    return db_expense
