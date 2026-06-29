@@ -131,7 +131,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     if db_user:
         logger.warning(f"Registration failed: Username '{user.username}' already exists")
         raise HTTPException(
-            status_code=422,
+            status_code=400,
             detail="Username already registered"
         )
     
