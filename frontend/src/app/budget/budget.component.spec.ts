@@ -35,8 +35,8 @@ describe('BudgetComponent', () => {
   });
 
   it('should have newBudget object with required properties', () => {
-    expect(component.newBudget).toHaveProperty('category');
-    expect(component.newBudget).toHaveProperty('limit');
+    expect(component.newBudget.category).toBeDefined();
+    expect(component.newBudget.limit).toBeDefined();;
   });
 
   it('should set errorMessage when category is missing', () => {

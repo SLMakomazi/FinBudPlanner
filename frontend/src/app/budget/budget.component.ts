@@ -20,6 +20,18 @@ export class BudgetComponent {
   http;
   apiUrl = 'http://localhost:8000/api';
 
+  get totalBudget(): number {
+    return this.budgetList.reduce((sum, b) => sum + (Number(b.limit) || 0), 0);
+  }
+
+  get totalSpent(): number {
+    return this.budgetList.reduce((sum, b) => sum + (Number(b.spent) || 0), 0);
+  }
+
+  get remainingBudget(): number {
+    return this.totalBudget - this.totalSpent;
+  }
+
   constructor(router: Router, http: HttpClient) {
     console.log('[BudgetComponent] Constructor called');
     this.router = router;
