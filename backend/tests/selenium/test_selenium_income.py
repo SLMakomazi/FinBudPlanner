@@ -7,9 +7,9 @@ import allure
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from pages.login_page import LoginPage
-from pages.signup_page import SignupPage
-from pages.dashboard_page import DashboardPage
+from tests.selenium.pages.login_page import LoginPage
+from tests.selenium.pages.signup_page import SignupPage
+from tests.selenium.pages.dashboard_page import DashboardPage
 
 
 BASE_URL = "http://localhost:4200"
