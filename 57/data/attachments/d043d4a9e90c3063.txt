@@ -1,0 +1,6 @@
+INFO:routers.auth:Registration attempt for username: testuser
+INFO:routers.auth:User 'testuser' registered successfully
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 200 OK"
+INFO:routers.auth:Registration attempt for username: testuser
+WARNING:routers.auth:Registration failed: Username 'testuser' already exists
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"

@@ -1,0 +1,12 @@
+INFO:routers.auth:Registration attempt for username: testuser
+WARNING:routers.auth:Registration failed: Username 'testuser' already exists
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"
+INFO:routers.auth:Login attempt for username: testuser
+INFO:routers.auth:User 'testuser' logged in successfully
+INFO:httpx:HTTP Request: POST http://testserver/api/token "HTTP/1.1 200 OK"
+INFO:routers.expense:Creating expense record for user 'testuser': Food, 200.0
+INFO:routers.expense:Expense record created successfully with ID: 7
+INFO:httpx:HTTP Request: POST http://testserver/api/expense "HTTP/1.1 200 OK"
+INFO:routers.expense:Deleting expense record 7 for user 'testuser'
+INFO:routers.expense:Expense record 7 deleted successfully
+INFO:httpx:HTTP Request: DELETE http://testserver/api/expense/7 "HTTP/1.1 200 OK"

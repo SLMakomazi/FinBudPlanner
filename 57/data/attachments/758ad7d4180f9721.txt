@@ -1,0 +1,15 @@
+INFO:routers.auth:Registration attempt for username: testuser
+WARNING:routers.auth:Registration failed: Username 'testuser' already exists
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"
+INFO:routers.auth:Login attempt for username: testuser
+INFO:routers.auth:User 'testuser' logged in successfully
+INFO:httpx:HTTP Request: POST http://testserver/api/token "HTTP/1.1 200 OK"
+INFO:routers.income:Creating income record for user 'testuser': Salary, 5000.0
+INFO:routers.income:Income record created successfully with ID: 1
+INFO:httpx:HTTP Request: POST http://testserver/api/income "HTTP/1.1 200 OK"
+INFO:routers.expense:Creating expense record for user 'testuser': Food, 200.0
+INFO:routers.expense:Expense record created successfully with ID: 1
+INFO:httpx:HTTP Request: POST http://testserver/api/expense "HTTP/1.1 200 OK"
+INFO:routers.dashboard:Fetching recent transactions for user 'testuser' (limit: 5)
+INFO:routers.dashboard:Returning 2 recent transactions for user 'testuser'
+INFO:httpx:HTTP Request: GET http://testserver/api/dashboard/recent-transactions "HTTP/1.1 200 OK"

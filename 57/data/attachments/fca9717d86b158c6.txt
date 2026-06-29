@@ -1,0 +1,9 @@
+INFO:routers.auth:Registration attempt for username: testuser
+WARNING:routers.auth:Registration failed: Username 'testuser' already exists
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"
+INFO:routers.auth:Login attempt for username: testuser
+INFO:routers.auth:User 'testuser' logged in successfully
+INFO:httpx:HTTP Request: POST http://testserver/api/token "HTTP/1.1 200 OK"
+INFO:routers.expense:Deleting expense record 99999 for user 'testuser'
+WARNING:routers.expense:Expense record 99999 not found for user 'testuser'
+INFO:httpx:HTTP Request: DELETE http://testserver/api/expense/99999 "HTTP/1.1 404 Not Found"

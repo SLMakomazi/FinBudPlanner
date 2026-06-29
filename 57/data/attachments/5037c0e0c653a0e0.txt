@@ -1,0 +1,9 @@
+INFO:routers.auth:Registration attempt for username: testuser
+WARNING:routers.auth:Registration failed: Username 'testuser' already exists
+INFO:httpx:HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"
+INFO:routers.auth:Login attempt for username: testuser
+INFO:routers.auth:User 'testuser' logged in successfully
+INFO:httpx:HTTP Request: POST http://testserver/api/token "HTTP/1.1 200 OK"
+INFO:routers.income:Fetching income records for user 'testuser'
+INFO:routers.income:Found 5 income records for user 'testuser'
+INFO:httpx:HTTP Request: GET http://testserver/api/income "HTTP/1.1 200 OK"

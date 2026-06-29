@@ -1,0 +1,1 @@
+INFO     httpx:_client.py:1013 HTTP Request: PUT http://testserver/api/expense/1 "HTTP/1.1 405 Method Not Allowed"

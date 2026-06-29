@@ -1,0 +1,12 @@
+INFO     routers.auth:auth.py:123 Registration attempt for username: testuser
+WARNING  routers.auth:auth.py:132 Registration failed: Username 'testuser' already exists
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/register "HTTP/1.1 400 Bad Request"
+INFO     routers.auth:auth.py:166 Login attempt for username: testuser
+INFO     routers.auth:auth.py:189 User 'testuser' logged in successfully
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/token "HTTP/1.1 200 OK"
+INFO     routers.expense:expense.py:40 Creating expense record for user 'testuser': Food, 200.0
+INFO     routers.expense:expense.py:53 Expense record created successfully with ID: 7
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/expense "HTTP/1.1 200 OK"
+INFO     routers.expense:expense.py:126 Deleting expense record 7 for user 'testuser'
+INFO     routers.expense:expense.py:136 Expense record 7 deleted successfully
+INFO     httpx:_client.py:1013 HTTP Request: DELETE http://testserver/api/expense/7 "HTTP/1.1 200 OK"

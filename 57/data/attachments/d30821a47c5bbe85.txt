@@ -1,0 +1,3 @@
+INFO     routers.auth:auth.py:166 Login attempt for username: nonexistent
+WARNING  routers.auth:auth.py:171 Login failed: User 'nonexistent' not found
+INFO     httpx:_client.py:1013 HTTP Request: POST http://testserver/api/token "HTTP/1.1 404 Not Found"
